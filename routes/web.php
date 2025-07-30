@@ -61,6 +61,23 @@ Route::prefix('occurrence')->name('occurrence.')->middleware('auth')->group(func
     Route::get('/', [OccurrenceController::class, 'index'])->name('index');
     Route::get('/create', [OccurrenceController::class, 'create'])->name('create');
     Route::post('/store', [OccurrenceController::class, 'store'])->name('store');
+
+      // Add Your Input
+    Route::get('/{occurrence}/input', [OccurrenceController::class, 'input'])->name('input');
+
+    // Edit/Update
+    Route::get('/{occurrence}/edit', [OccurrenceController::class, 'edit'])->name('edit');
+    Route::put('/{occurrence}', [OccurrenceController::class, 'update'])->name('update');
+
+    // Delete
+    Route::delete('/{id}', [OccurrenceController::class, 'destroy'])->name('destroy');
+
+    Route::get('/{id}/edit', [OccurrenceController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [OccurrenceController::class, 'update'])->name('update');
+
+    Route::post('/{occurrence}/input', [OccurrenceController::class, 'input'])->name('input');
+
+
 });
 
 Route::middleware(['auth'])->prefix('user')->group(function () {

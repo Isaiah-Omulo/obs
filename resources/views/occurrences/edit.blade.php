@@ -1,56 +1,49 @@
 @extends('layouts.default')
-@section('title', 'Report New Occurrence')
-
-
+@section('title', 'Edit Occurrence')
 
 @push('styles')
-
 <style>
 .is-invalid {
     border-color: #dc3545;
 }
 </style>
-
 @endpush
 
 @section('content')
 <div class="container mt-4">
-
-    <!-- Top Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0">Report New Occurrence</h4>
+        <h4 class="mb-0">Edit Occurrence</h4>
         <a href="{{ route('occurrence.index') }}" class="btn btn-outline-secondary btn-sm">All Occurrences</a>
     </div>
 
-    <!-- Multi-Step Panel -->
     <div class="card shadow-lg">
         <div class="card-header bg-primary text-white">
             <strong>Step <span id="step-title">1</span>: Reporter Details</strong>
         </div>
         <div class="card-body">
-            <form id="occurrenceForm" method="POST" action="{{ route('occurrence.store') }}" enctype="multipart/form-data">
+            <form id="occurrenceForm" method="POST" action="{{ route('occurrence.update', $occurrence->id) }}" enctype="multipart/form-data">
                 @csrf
+                @method('PUT')
 
-                <!-- Step 1: Reporter Details -->
                 <div class="form-step active">
                     <div class="mb-3">
                         <label>Name</label>
-                        <input type="text" name="user_id" class="form-control" value="{{ Auth::user()->name }}" readonly>
+                        <input type="text" name="user_id" class="form-control" value="{{ $occurrence->user->name }}" readonly>
                     </div>
 
                     <div class="mb-3">
                         <label>Role</label>
-                        <input type="text" name="reporter_role" class="form-control" value="{{ Auth::user()->role }}" readonly>
+                        <input type="text" name="reporter_role" class="form-control" value="{{ $occurrence->user->role }}" readonly>
                     </div>
 
-                   <div class="mb-3">
+                    <div class="mb-3">
                         <label>Shift</label>
                         <select id="shift_display" class="form-control" disabled>
                             <option value="">Select shift</option>
-                            <option value="Day">Day</option>
-                            <option value="Night">Night</option>
+                            <option value="Day" {{ $occurrence->shift === 'Day' ? 'selected' : '' }}>Day</option>
+                            <option value="Night" {{ $occurrence->shift === 'Night' ? 'selected' : '' }}>Night</option>
                         </select>
-                        <input type="hidden" name="shift" id="shift" />
+                        <input type="hidden" name="shift" id="shift" value="{{ $occurrence->shift }}" />
                     </div>
 
                     <div class="mb-3">
@@ -58,66 +51,58 @@
                         <select name="location" class="form-control" required>
                             <option value="">Select Hostel</option>
                             @foreach($hostels as $hostel)
-                                <option value="{{ $hostel->name }}" {{ (old('location', Auth::user()->assigned_location ?? '') == $hostel->name) ? 'selected' : '' }}>
+                                <option value="{{ $hostel->name }}" {{ $occurrence->hostel === $hostel->name ? 'selected' : '' }}>
                                     {{ $hostel->name }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
-
                 </div>
 
-                <!-- Step 2: Occurrence Details -->
                 <div class="form-step">
                     <div class="mb-3">
                         <label>Date of Occurrence</label>
-                        <input type="date" name="date" class="form-control" value="{{ date('Y-m-d') }}" required>
+                        <input type="date" name="date" class="form-control" value="{{ $occurrence->date }}" required>
                     </div>
 
                     <div class="mb-3">
                         <label>Time of Occurrence</label>
-                        <input type="time" name="time" class="form-control" required>
+                        <input type="time" name="time" class="form-control" value="{{ $occurrence->time }}" required>
                     </div>
 
                     <div class="mb-3">
                         <label>Nature of Occurrence</label>
-                        <textarea name="nature" class="form-control" rows="3" required></textarea>
+                        <textarea name="nature" class="form-control" rows="3" required>{{ $occurrence->nature }}</textarea>
                     </div>
                 </div>
 
-                <!-- Step 3: Actions -->
                 <div class="form-step">
                     <div class="mb-3">
                         <label>Action Taken</label>
-                        <textarea name="action_taken" class="form-control" rows="3" required></textarea>
+                        <textarea name="action_taken" class="form-control" rows="3" required>{{ $occurrence->action_taken }}</textarea>
                     </div>
 
                     <div class="mb-3">
                         <label>Resolution / Outcome</label>
-                        <textarea name="resolution" class="form-control" rows="3" required></textarea>
+                        <textarea name="resolution" class="form-control" rows="3" required>{{ $occurrence->resolution }}</textarea>
                     </div>
 
-                   
-
                     <div class="mb-3">
-                    <label>Upload Supporting Files</label>
-                    <input type="file" name="attachment[]" class="form-control" multiple>
+                        <label>Upload Supporting Files</label>
+                        <input type="file" name="attachment[]" class="form-control" multiple>
+                    </div>
                 </div>
 
-                </div>
-
-                <!-- Navigation -->
                 <div class="d-flex justify-content-between">
                     <button type="button" class="btn btn-secondary" id="prevStep" style="display:none;">Previous</button>
                     <button type="button" class="btn btn-primary" id="nextStep">Next</button>
-                    <button type="submit" class="btn btn-success" id="submitBtn" style="display:none;">Submit</button>
+                    <button type="submit" class="btn btn-success" id="submitBtn" style="display:none;">Update</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Step-by-step logic -->
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -138,27 +123,24 @@ document.addEventListener('DOMContentLoaded', function () {
         submitBtn.style.display = index === steps.length - 1 ? 'inline-block' : 'none';
     }
 
-            nextBtn.addEventListener('click', () => {
-            const currentFields = steps[currentStep].querySelectorAll('input, select, textarea');
-            let isValid = true;
+    nextBtn.addEventListener('click', () => {
+        const currentFields = steps[currentStep].querySelectorAll('input, select, textarea');
+        let isValid = true;
 
-            currentFields.forEach(field => {
-                if (field.hasAttribute('required') && !field.value.trim()) {
-                    isValid = false;
-                    field.classList.add('is-invalid');
-                } else {
-                    field.classList.remove('is-invalid');
-                }
-            });
-
-            if (isValid) {
-                if (currentStep < steps.length - 1) {
-                    currentStep++;
-                    showStep(currentStep);
-                }
+        currentFields.forEach(field => {
+            if (field.hasAttribute('required') && !field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
             }
         });
 
+        if (isValid && currentStep < steps.length - 1) {
+            currentStep++;
+            showStep(currentStep);
+        }
+    });
 
     prevBtn.addEventListener('click', () => {
         if (currentStep > 0) {
@@ -169,28 +151,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     showStep(currentStep);
 });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const shiftDisplay = document.getElementById('shift_display');
-        const shiftHidden = document.getElementById('shift');
-
-        const nairobiTimeStr = new Date().toLocaleString("en-US", { timeZone: "Africa/Nairobi" });
-        const nairobiDate = new Date(nairobiTimeStr);
-
-        const hours = nairobiDate.getHours();
-        const minutes = nairobiDate.getMinutes();
-
-        const totalMinutes = hours * 60 + minutes;
-
-        const dayStart = 6 * 60 + 59;
-        const dayEnd = 18 * 60 + 59;
-
-        const shift = (totalMinutes >= dayStart && totalMinutes <= dayEnd) ? 'Day' : 'Night';
-
-        shiftDisplay.value = shift;
-        shiftHidden.value = shift;
-    });
 </script>
 @endpush
 @endsection

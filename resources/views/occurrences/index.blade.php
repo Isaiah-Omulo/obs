@@ -11,8 +11,13 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
 @endpush
-<div class="container">
-    <h2 class="mb-4">All Occurrences</h2>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">All Occurrences</h2>
+        <a href="{{ route('occurrence.create') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Occurrence
+        </a>
+    </div>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -78,7 +83,8 @@
 
                                    <button 
                                         class="btn btn-outline-danger btn-delete-occurrence" 
-                                        data-id="{{ $occurrence->id }}" 
+                                        data-id="{{ $occurrence->id }}"
+                                        data-url="{{ route('occurrence.destroy', $occurrence->id) }}" 
                                         title="Delete Occurrence">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -118,8 +124,24 @@
 
                 @empty
                     <tr>
-                        <td colspan="9" class="text-center text-muted">No occurrences found.</td>
-                    </tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+
+                    
+
+                    <th></th>
+                    @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
+                        <th></th>
+                        <th></th>
+                    @endif
+                </tr>
                 @endforelse
             </tbody>
         </table>
@@ -264,5 +286,59 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 </script>
+
+
+<script>
+$(document).on('click', '.btn-delete-occurrence', function () {
+    const occurrenceId = $(this).data('id');
+    const url = $(this).data('url');
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This occurrence will be permanently deleted.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                success: function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Deleted!',
+                        text: response.message || 'Occurrence has been deleted.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    $(`#occurrence-row-${occurrenceId}`).fadeOut('slow', function () {
+                        $(this).remove();
+                    });
+                },
+                error: function (xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to delete occurrence.'
+                    });
+                }
+            });
+        }
+    });
+});
+
+</script>
+
 
 @endpush

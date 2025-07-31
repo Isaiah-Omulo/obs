@@ -25,7 +25,7 @@
     <!-- Multi-Step Panel -->
     <div class="card shadow-lg">
         <div class="card-header bg-primary text-white">
-            <strong>Step <span id="step-title">1</span>: Reporter Details</strong>
+            <strong>Step <span id="step-title">1</span>: <span id="step-name">Reporter Details</span> </strong>
         </div>
         <div class="card-body">
             <form id="occurrenceForm" method="POST" action="{{ route('occurrence.store') }}" enctype="multipart/form-data">
@@ -126,13 +126,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const prevBtn = document.getElementById('prevStep');
     const submitBtn = document.getElementById('submitBtn');
     const stepTitle = document.getElementById('step-title');
+    const stepName = document.getElementById('step-name');
     let currentStep = 0;
+    const stepNames = [
+    'Reporter Details',
+    'Occurrence Details',
+    'Actions and Attachments'
+];
+
 
     function showStep(index) {
         steps.forEach((step, i) => {
             step.style.display = (i === index) ? 'block' : 'none';
         });
         stepTitle.textContent = index + 1;
+        stepName.textContent = stepNames[index];
         prevBtn.style.display = index > 0 ? 'inline-block' : 'none';
         nextBtn.style.display = index < steps.length - 1 ? 'inline-block' : 'none';
         submitBtn.style.display = index === steps.length - 1 ? 'inline-block' : 'none';

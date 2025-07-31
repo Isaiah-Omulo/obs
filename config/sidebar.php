@@ -71,6 +71,44 @@ return [
                     'route-name' => 'hostels.index'
                 ]
             ]
-        ]
-    ]
+        ],
+
+         // Reports Section
+        [
+            'icon'     => 'fa fa-file-alt',
+            'title'    => 'Reports',
+            'sub_menu' => [
+                [
+                    'title'      => 'Add',
+                    'route-name' => 'daily_reports.create'
+                ],
+                [
+                    'title'      => 'Zonal Reports',
+                    'route-name' => 'daily_reports.index' // You can filter by user role or zone in controller/view
+                ],
+                [
+                    'title'      => 'Administrator/Coordinator',
+                    'route-name' => 'daily_reports.admin' // You'll define this route in web.php and controller
+                ]
+            ]
+        ],
+         [
+            'icon'     => 'fa fa-chart-bar',
+            'title'    => 'Student Statistics',
+            'sub_menu' => [
+                [
+                    'title'      => 'Add',
+                    'route-name' => 'student_statistics.create'
+                ],
+                [
+                    'title'      => 'All',
+                    'route-name' => 'student_statistics.index'
+                ]
+            ]
+        ],
+
+        
+    ],
+   
+
 ];

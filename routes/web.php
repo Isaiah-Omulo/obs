@@ -7,6 +7,9 @@ use App\Http\Controllers\OccurrenceController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OtherController;
 use App\Http\Controllers\ZoneController;
+use App\Http\Controllers\DailyReportController;
+use App\Http\Controllers\StudentStatisticController;
+
 Route::get('/', function () {
     Log::info("Home page: ");
     if (!Auth::check()) {
@@ -121,3 +124,53 @@ Route::middleware(['auth'])->prefix('zones')->group(function () {
     Route::delete('/hostels/{id}', [ZoneController::class, 'hostelDestroy'])->name('hostels.destroy');
 });
 
+
+Route::prefix('daily-reports')->name('daily_reports.')->middleware('auth')->group(function () {
+    // List all reports
+    Route::get('/', [DailyReportController::class, 'index'])->name('index');
+
+    // Create form
+    Route::get('/create', [DailyReportController::class, 'create'])->name('create');
+
+    // Store new report
+    Route::post('/store', [DailyReportController::class, 'store'])->name('store');
+
+    // View/edit manager/director input (optional)
+  //  Route::get('/{daily_report}/input', [DailyReportController::class, 'input'])->name('input');
+    Route::post('/{daily_report}/input', [DailyReportController::class, 'storeInput'])->name('input');
+
+    // Edit form
+    Route::get('/{dailyreport}/edit', [DailyReportController::class, 'edit'])->name('edit');
+
+    // Update report
+    Route::put('/{dailyreport}', [DailyReportController::class, 'update'])->name('update');
+
+    // Delete report
+    Route::delete('/{id}', [DailyReportController::class, 'destroy'])->name('destroy');
+    Route::get('/admin', [DailyReportController::class, 'admin'])->name('admin');
+
+});
+
+
+Route::prefix('student-statistics')->name('student_statistics.')->middleware('auth')->group(function () {
+    // List all records
+    Route::get('/', [StudentStatisticController::class, 'index'])->name('index');
+
+    // Create form
+    Route::get('/create', [StudentStatisticController::class, 'create'])->name('create');
+
+    // Store new record
+    Route::post('/store', [StudentStatisticController::class, 'store'])->name('store');
+
+    // Edit form
+    Route::get('/{studentStatistic}/edit', [StudentStatisticController::class, 'edit'])->name('edit');
+
+    // Update existing record
+    Route::put('/{studentStatistic}', [StudentStatisticController::class, 'update'])->name('update');
+
+    // Delete record
+    Route::delete('/{studentStatistic}', [StudentStatisticController::class, 'destroy'])->name('destroy');
+
+    // Optional: Show a single record (if needed)
+    Route::get('/{studentStatistic}', [StudentStatisticController::class, 'show'])->name('show');
+});

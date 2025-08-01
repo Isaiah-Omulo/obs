@@ -9,11 +9,19 @@ use App\Models\User;
 class UserController extends Controller
 {
 
-        public function index()
+      public function index(Request $request)
     {
-        $users = User::orderBy('created_at', 'desc')->get();
+        $usersQuery = User::query();
+
+        if ($request->filter === 'hostel') {
+            $usersQuery->whereIn('role', ['hostel_attendant', 'house_keeper']);
+        }
+
+        $users = $usersQuery->orderBy('created_at', 'desc')->get();
+
         return view('user.index', compact('users'));
     }
+
 
     public function edit()
     {

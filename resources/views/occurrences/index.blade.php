@@ -33,9 +33,11 @@
                     <th>Hostel</th>
                     <th>Date</th>
                     <th>Time</th>
+                    <th>Occurrence Type</th>
                     <th>Nature of Occurrence</th>
                     <th>Action Taken</th>
                     <th>Resolution</th>
+                    <th>Resolved</th>
 
                     
 
@@ -98,9 +100,11 @@
                         <td>{{ $occurrence->hostel }}</td>
                         <td>{{ $occurrence->date }}</td>
                         <td>{{ $occurrence->time }}</td>
+                        <td>{{ $occurrence->occurrence_type }}</td>
                         <td>{{ $occurrence->nature }}</td>
                         <td>{{ $occurrence->action_taken }}</td>
                         <td>{{ $occurrence->resolution }}</td>
+                        <td>{{ $occurrence->resolved  }}</td>
                         <td>
                             @if($occurrence->files && $occurrence->files->count())
                                 <ul class="list-unstyled">

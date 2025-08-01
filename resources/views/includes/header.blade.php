@@ -28,7 +28,7 @@ if (Auth::check()) {
         <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
             
             <!-- Navbar Brand and Mobile Togglers -->
-            <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center">
                 @if ($appSidebarTwo)
                     <button class="btn btn-sm d-md-none" type="button" data-toggle="app-sidebar-end-mobile">
                         <i class="fa fa-bars"></i>
@@ -66,9 +66,11 @@ if (Auth::check()) {
             </div>
 
 
-            <!-- Right-side Navbar Items -->
+          
+
+            <!-- Right-side Navbar Items 
             <div class="d-flex align-items-center gap-3">
-                <!-- Notifications -->
+               
                 <div class="dropdown">
                    <a href="#" id="notificationDropdownToggle" data-bs-toggle="dropdown" class="btn btn-info position-relative">
 
@@ -78,6 +80,7 @@ if (Auth::check()) {
                     @include('includes.component.header-dropdown-notification')
 
                 </div>
+                -->
 
                 <!-- Language Bar -->
                 @isset($appHeaderLanguageBar)

@@ -228,5 +228,5 @@ var TreeView = function () {
 }();
 
 $(document).ready(function() {
-	TreeView.init();
+ TreeView.init();
 });

@@ -13,64 +13,33 @@ return [
         [
             'icon'     => 'fa fa-user',
             'title'    => 'User',
-            'sub_menu' => [
-                [
-                    'title'      => 'Add',
-                    'route-name' => 'user.create'
-                ],
-                [
-                    'title'      => 'All',
-                    'route-name' => 'user.index'
-                ]
-            ]
+            'route-name' => 'user.index'
+            
         ],
 
         // Occurrence Section
         [
             'icon'     => 'fa fa-book',
             'title'    => 'Occurrence',
-            'sub_menu' => [
-                [
-                    'title'      => 'Add',
-                    'route-name' => 'occurrence.create'
-                ],
-                [
-                    'title'      => 'All',
-                    'route-name' => 'occurrence.index'
-                ]
-            ]
+            'route-name' => 'occurrence.index'
+            
         ],
 
         // Zones Section
         [
             'icon'     => 'fa fa-map-marker-alt',
             'title'    => 'Zones',
-            'sub_menu' => [
-                [
-                    'title'      => 'Add',
-                    'route-name' => 'zones.create'
-                ],
-                [
-                    'title'      => 'All',
-                    'route-name' => 'zones.index'
-                ]
-            ]
+            'route-name' => 'zones.index'
+            
         ],
 
         // Hostels Section
         [
             'icon'     => 'fa fa-building',
             'title'    => 'Hostels',
-            'sub_menu' => [
-                [
-                    'title'      => 'Add',
-                    'route-name' => 'hostels.create'
-                ],
-                [
-                    'title'      => 'All',
-                    'route-name' => 'hostels.index'
-                ]
-            ]
+            'route-name' => 'hostels.index'
+            
+
         ],
 
          // Reports Section
@@ -95,16 +64,8 @@ return [
          [
             'icon'     => 'fa fa-chart-bar',
             'title'    => 'Student Statistics',
-            'sub_menu' => [
-                [
-                    'title'      => 'Add',
-                    'route-name' => 'student_statistics.create'
-                ],
-                [
-                    'title'      => 'All',
-                    'route-name' => 'student_statistics.index'
-                ]
-            ]
+            'route-name' => 'student_statistics.index'
+          
         ],
 
         

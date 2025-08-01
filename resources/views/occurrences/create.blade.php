@@ -78,7 +78,25 @@
                         <label>Time of Occurrence</label>
                         <input type="time" name="time" class="form-control" required>
                     </div>
+                    
 
+                    <!-- Occurrence Type Dropdown -->
+                    <div class="mb-3">
+                        <label for="nature" class="form-label">Type of Occurrence</label>
+                        <select name="occurrence_type" id="occurrence_type" class="form-control" required>
+                            <option value="">-- Select Type --</option>
+                            @foreach($occurrenceTypes as $type)
+                                <option value="{{ $type }}">{{ ucfirst($type) }}</option>
+                            @endforeach
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom input if "Other" selected -->
+                    <div class="mb-3 d-none" id="customNatureWrapper">
+                        <label for="custom_nature" class="form-label">Specify Occurrence Type</label>
+                        <input type="text" name="custom_nature" id="custom_nature" class="form-control">
+                    </div>
                     <div class="mb-3">
                         <label>Nature of Occurrence</label>
                         <textarea name="nature" class="form-control" rows="3" required></textarea>
@@ -91,7 +109,15 @@
                         <label>Action Taken</label>
                         <textarea name="action_taken" class="form-control" rows="3" required></textarea>
                     </div>
-
+                    
+                    <div class="mb-3">
+                        <label for="resolved" class="form-label">Resolved</label>
+                        <select name="resolved" id="resolved" class="form-control" required>
+                            <option value="">-- Select --</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label>Resolution / Outcome</label>
                         <textarea name="resolution" class="form-control" rows="3" required></textarea>
@@ -200,5 +226,19 @@ document.addEventListener('DOMContentLoaded', function () {
         shiftHidden.value = shift;
     });
 </script>
+
+<script>
+    document.getElementById('occurrence_type').addEventListener('change', function () {
+        const customInput = document.getElementById('customNatureWrapper');
+        if (this.value === 'Other') {
+            customInput.classList.remove('d-none');
+            document.getElementById('custom_nature').required = true;
+        } else {
+            customInput.classList.add('d-none');
+            document.getElementById('custom_nature').required = false;
+        }
+    });
+</script>
+
 @endpush
 @endsection

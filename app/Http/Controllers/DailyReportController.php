@@ -157,11 +157,17 @@ class DailyReportController extends Controller
         return ($hour >= 6 && $hour < 18) ? 'day' : 'night';
     }
 
-    public function admin()
+    public function admin(Request $request)
     {
-        $dailyReports = DailyReport::whereHas('user', function ($query) {
+        $query = DailyReport::whereHas('user', function ($query) {
             $query->whereIn('role', ['administrator', 'coordinator']);
-        })->latest()->get();
+        });
+
+        if ($request->query('filter') === 'today') {
+            $query->whereDate('created_at', Carbon::today());
+        }
+
+        $dailyReports = $query->latest()->get();
 
         return view('daily_report.admin', compact('dailyReports'));
     }

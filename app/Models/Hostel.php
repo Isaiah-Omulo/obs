@@ -12,4 +12,8 @@ class Hostel extends Model
     {
         return $this->belongsTo(Zone::class);
     }
+
+    public function studentStatistics(){
+        return $this->hasMany(StudentStatistic::class);
+    }
 }

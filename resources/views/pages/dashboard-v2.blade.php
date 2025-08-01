@@ -1,6 +1,6 @@
 @extends('layouts.default')
 
-@section('title', 'Dashboard V2')
+@section('title', 'Dashboard OBS')
 
 @push('css')
 	<link href="/assets/plugins/jvectormap-next/jquery-jvectormap.css" rel="stylesheet" />
@@ -18,293 +18,442 @@
 	<script src="/assets/plugins/gritter/js/jquery.gritter.js"></script>
 	<script src="/assets/js/demo/dashboard-v2.js"></script>
 @endpush
+@php
+    use Carbon\Carbon;
+    $today = Carbon::today()->toDateString();
+@endphp
+
 
 @section('content')
-	<!-- BEGIN breadcrumb -->
-	<ol class="breadcrumb float-xl-end">
-		<li class="breadcrumb-item"><a href="javascript:;">Home</a></li>
-		<li class="breadcrumb-item"><a href="javascript:;">Dashboard</a></li>
-		<li class="breadcrumb-item active">Dashboard v2</li>
-	</ol>
-	<!-- END breadcrumb -->
-	<!-- BEGIN page-header -->
-	<h1 class="page-header">Dashboard v2 <small>header small text goes here...</small></h1>
-	<!-- END page-header -->
-	<!-- BEGIN row -->
-	<div class="row">
-		<!-- BEGIN col-3 -->
+<ol class="breadcrumb float-xl-end">
+	<li class="breadcrumb-item"><a href="javascript:;">Home</a></li>
+	<li class="breadcrumb-item active">Dashboard</li>
+</ol>
+<h1 class="page-header">Dashboard OBS <small>Metrics Overview</small></h1>
+
+<div class="row">
+	<div class="col-xl-3 col-md-6">
+	    <a href="{{ route('occurrence.index') }}" class="text-decoration-none">
+	        <div class="widget widget-stats bg-danger text-white shadow-lg rounded-3" style="cursor: pointer;">
+	            <div class="stats-icon stats-icon-lg bg-white text-danger">
+	                <i class="fa fa-exclamation-triangle fa-lg"></i>
+	            </div>
+	            <div class="stats-content">
+	                <div class="stats-title text-uppercase fw-bold">Total Occurrences</div>
+	                <div class="stats-number display-6 fw-bold">{{ $totalOccurrences }}</div>
+	                <div class="stats-desc">All reports across hostels</div>
+	            </div>
+	        </div>
+	    </a>
+	</div>
+
+	
 		<div class="col-xl-3 col-md-6">
-			<div class="widget widget-stats bg-teal">
-				<div class="stats-icon stats-icon-lg"><i class="fa fa-globe fa-fw"></i></div>
+			<a href="{{ route('occurrence.index', ['filter' => 'unresolved']) }}" class="text-decoration-none text-white">
+			<div class="widget widget-stats bg-warning">
+				<div class="stats-icon stats-icon-lg"><i class="fa fa-tools"></i></div>
 				<div class="stats-content">
-					<div class="stats-title">TODAY'S VISITS</div>
-					<div class="stats-number">7,842,900</div>
-					<div class="stats-progress progress">
-						<div class="progress-bar" style="width: 70.1%;"></div>
-					</div>
-					<div class="stats-desc">Better than last week (70.1%)</div>
+					<div class="stats-title">UNRESOLVED ISSUES</div>
+					<div class="stats-number">{{ $unresolvedOccurrences }}</div>
+					<div class="stats-desc">Still pending action</div>
 				</div>
 			</div>
+			</a>
 		</div>
-		<!-- END col-3 -->
-		<!-- BEGIN col-3 -->
+	
+
+	
+	    <div class="col-xl-3 col-md-6">
+	    	<a href="{{ route('daily_reports.index', ['date' => $today]) }}" class="text-decoration-none text-white">
+	        <div class="widget widget-stats bg-success">
+	            <div class="stats-icon stats-icon-lg"><i class="fa fa-calendar-day"></i></div>
+	            <div class="stats-content">
+	                <div class="stats-title">TODAY'S REPORTS</div>
+	                <div class="stats-number">{{ count($dailyReports) }}</div>
+	                <div class="stats-desc">Logged today</div>
+	            </div>
+	        </div>
+	    	</a>
+	    </div>
+	
 		<div class="col-xl-3 col-md-6">
-			<div class="widget widget-stats bg-blue">
-				<div class="stats-icon stats-icon-lg"><i class="fa fa-dollar-sign fa-fw"></i></div>
-				<div class="stats-content">
-					<div class="stats-title">TODAY'S PROFIT</div>
-					<div class="stats-number">180,200</div>
-					<div class="stats-progress progress">
-						<div class="progress-bar" style="width: 40.5%;"></div>
+			<a href="{{ route('user.index', ['filter' => 'hostel']) }}" class="text-decoration-none text-white">
+				<div class="widget widget-stats bg-primary">
+					<div class="stats-icon stats-icon-lg"><i class="fa fa-user-friends"></i></div>
+					<div class="stats-content">
+						<div class="stats-title">HOSTEL ATTENDANTS</div>
+						<div class="stats-number">{{ $hostelAttendants }}</div>
+						<div class="stats-desc">Active reporters</div>
 					</div>
-					<div class="stats-desc">Better than last week (40.5%)</div>
 				</div>
-			</div>
+			</a>
 		</div>
-		<!-- END col-3 -->
-		<!-- BEGIN col-3 -->
-		<div class="col-xl-3 col-md-6">
+
+	<div class="col-xl-3 col-md-6">
+	    <div class="widget widget-stats bg-info text-white shadow-lg rounded-3"
+	         data-bs-toggle="collapse" data-bs-target="#hostelBreakdownTable" style="cursor: pointer;">
+	        <div class="stats-icon stats-icon-lg bg-white text-info">
+	            <i class="fa fa-home fa-lg"></i>
+	        </div>
+	        <div class="stats-content">
+	            <div class="stats-title text-uppercase fw-bold">Hostels Covered</div>
+	            <div class="stats-number display-6 fw-bold">{{ $totalHostels }}</div>
+	            <div class="stats-desc">In the system</div>
+	        </div>
+	    </div>
+	</div>
+
+	<div class="collapse col-12 mb-4" id="hostelBreakdownTable">
+		    <div class="card card-body border shadow-sm">
+		        <h6 class="mb-3 fw-bold">Hostel Breakdown – Students Present Today</h6>
+		        <div class="table-responsive">
+		            <table class="table table-sm table-bordered align-middle mb-0">
+		                <thead class="table-light">
+		                    <tr>
+		                        <th>#</th>
+		                        <th>Hostel Name</th>
+		                        <th class="text-end">Students Present</th>
+		                    </tr>
+		                </thead>
+		                <tbody>
+		                    @forelse($hostelBreakdown as $index => $hostel)
+		                        <tr>
+		                            <td>{{ $index + 1 }}</td>
+		                            <td>{{ $hostel->name }}</td>
+		                            <td class="text-end">{{ $hostel->students_present }}</td>
+		                        </tr>
+		                    @empty
+		                        <tr>
+		                            <td colspan="3" class="text-center text-muted">No hostel data found for today.</td>
+		                        </tr>
+		                    @endforelse
+		                </tbody>
+		            </table>
+		        </div>
+		    </div>
+	</div>
+
+
+	<div class="col-xl-3 col-md-6">
+		<a href="{{ route('student_statistics.index', ['filter' => 'today']) }}" class="text-decoration-none text-white">
 			<div class="widget widget-stats bg-indigo">
-				<div class="stats-icon stats-icon-lg"><i class="fa fa-archive fa-fw"></i></div>
+				<div class="stats-icon stats-icon-lg"><i class="fa fa-chart-line"></i></div>
 				<div class="stats-content">
-					<div class="stats-title">NEW ORDERS</div>
-					<div class="stats-number">38,900</div>
-					<div class="stats-progress progress">
-						<div class="progress-bar" style="width: 76.3%;"></div>
-					</div>
-					<div class="stats-desc">Better than last week (76.3%)</div>
+					<div class="stats-title">DAILY STATS SUBMITTED</div>
+					<div class="stats-number">{{ $dailyStatsSubmitted }}</div>
+					<div class="stats-desc">Student reports today</div>
 				</div>
 			</div>
-		</div>
-		<!-- END col-3 -->
-		<!-- BEGIN col-3 -->
-		<div class="col-xl-3 col-md-6">
-			<div class="widget widget-stats bg-gray-900">
-				<div class="stats-icon stats-icon-lg"><i class="fa fa-comment-alt fa-fw"></i></div>
+		</a>
+	</div>
+
+
+	<div class="col-xl-3 col-md-6">
+		<a href="{{ route('daily_reports.admin', ['filter' => 'today']) }}" class="text-decoration-none">
+			<div class="widget widget-stats bg-gradient-blue text-white shadow-lg rounded-3">
+				<div class="stats-icon stats-icon-lg bg-white text-indigo">
+					<i class="fa fa-user-shield fa-lg"></i>
+				</div>
 				<div class="stats-content">
-					<div class="stats-title">NEW COMMENTS</div>
-					<div class="stats-number">3,988</div>
-					<div class="stats-progress progress">
-						<div class="progress-bar" style="width: 54.9%;"></div>
-					</div>
-					<div class="stats-desc">Better than last week (54.9%)</div>
+					<div class="stats-title text-uppercase fw-bold">Administrator Reports</div>
+					<div class="stats-number display-6 fw-bold">{{ $adminDailyStatsSubmitted }}</div>
+					<div class="stats-desc">Submitted today by Admins</div>
 				</div>
 			</div>
-		</div>
-		<!-- END col-3 -->
+		</a>
 	</div>
-	<!-- END row -->
-	<!-- BEGIN row -->
-	<div class="row">
-		<!-- BEGIN col-8 -->
-		<div class="col-xl-8">
-			<div class="widget-chart with-sidebar" data-bs-theme="dark">
-				<div class="widget-chart-content bg-gray-800">
-					<h4 class="chart-title">
-						Visitors Analytics
-						<small>Where do our visitors come from</small>
-					</h4>
-					<div id="visitors-line-chart" class="widget-chart-full-width dark-mode" style="height: 257px;" ></div>
-				</div>
-				<div class="widget-chart-sidebar bg-gray-900">
-					<div class="chart-number">
-						1,225,729
-						<small>Total visitors</small>
-					</div>
-					<div class="flex-grow-1 d-flex align-items-center">
-						<div id="visitors-donut-chart" data-bs-theme="dark" style="height: 180px" ></div>
-					</div>
-					<ul class="chart-legend fs-11px">
-						<li><i class="fa fa-circle fa-fw text-blue fs-9px me-5px t-minus-1"></i> 34.0% <span>New Visitors</span></li>
-						<li><i class="fa fa-circle fa-fw text-teal fs-9px me-5px t-minus-1"></i> 56.0% <span>Return Visitors</span></li>
-					</ul>
-				</div>
-			</div>
-		</div>
-		<!-- END col-8 -->
-		<!-- BEGIN col-4 -->
-		<div class="col-xl-4">
-			<div class="panel panel-inverse" data-sortable-id="index-1">
-				<div class="panel-heading">
-					<h4 class="panel-title">
-						Visitors Origin
-					</h4>
-				</div>
-				<div id="visitors-map" class="bg-gray-900" data-bs-theme="dark" style="height: 170px;" ></div>
-				<div class="list-group list-group-flush "  data-bs-theme="dark">
-					<a href="javascript:;" class="list-group-item list-group-item-action d-flex">
-						<span class="flex-1">1. United State</span>
-						<span class="badge bg-teal fs-10px">20.95%</span>
-					</a>
-					<a href="javascript:;" class="list-group-item list-group-item-action d-flex">
-						<span class="flex-1">2. India</span>
-						<span class="badge bg-blue fs-10px">16.12%</span>
-					</a>
-					<a href="javascript:;" class="list-group-item list-group-item-action d-flex rounded-bottom">
-						<span class="flex-1">3. Mongolia</span>
-						<span class="badge bg-gray-600 fs-10px">14.99%</span>
-					</a>
-				</div>
-			</div>
-		</div>
-		<!-- END col-4 -->
+
+
+
+	<div class="col-xl-3 col-md-6">
+	    <div class="widget widget-stats bg-gradient-black text-white shadow-lg rounded-3"
+	         data-bs-toggle="collapse" data-bs-target="#zonalDetails" style="cursor: pointer;">
+	        
+	        <div class="stats-icon stats-icon-lg bg-white text-blue">
+	            <i class="fa fa-map-marker-alt fa-lg"></i>
+	        </div>
+
+	        <div class="stats-content">
+	            <div class="stats-title text-uppercase fw-bold">Zonal Officer Reports</div>
+	            <div class="stats-number display-6 fw-bold">{{ $zonalReportsToday }}</div>
+	            <div class="stats-desc">Submitted Today from Zones</div>
+	        </div>
+	    </div>
 	</div>
-	<!-- END row -->
-	<!-- BEGIN row -->
-	<div class="row">
-		<!-- BEGIN col-4 -->
-		<div class="col-xl-4 col-lg-6">
-			<!-- BEGIN panel -->
-			<div class="panel panel-inverse" data-sortable-id="index-2">
-				<div class="panel-heading">
-					<h4 class="panel-title">Chat History</h4>
-					<span class="badge bg-teal">4 message</span>
-				</div>
-				<div class="panel-body bg-light">
-					<div class="chats" data-scrollbar="true" data-height="225px">
-						<div class="chats-item start">
-							<span class="date-time">yesterday 11:23pm</span>
-							<a href="javascript:;" class="name">Sowse Bawdy</a>
-							<a href="javascript:;" class="image"><img alt="" src="/assets/img/user/user-12.jpg" /></a>
-							<div class="message">
-								Lorem ipsum dolor sit amet, consectetuer adipiscing elit volutpat. Praesent mattis interdum arcu eu feugiat.
-							</div>
-						</div>
-						<div class="chats-item end">
-							<span class="date-time">08:12am</span>
-							<a href="javascript:;" class="name"><span class="badge bg-blue">ADMIN</span> Me</a>
-							<a href="javascript:;" class="image"><img alt="" src="/assets/img/user/user-13.jpg" /></a>
-							<div class="message">
-								Nullam posuere, nisl a varius rhoncus, risus tellus hendrerit neque.
-							</div>
-						</div>
-						<div class="chats-item start">
-							<span class="date-time">09:20am</span>
-							<a href="javascript:;" class="name">Neck Jolly</a>
-							<a href="javascript:;" class="image"><img alt="" src="/assets/img/user/user-10.jpg" /></a>
-							<div class="message">
-								Euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-							</div>
-						</div>
-						<div class="chats-item start">
-							<span class="date-time">11:15am</span>
-							<a href="javascript:;" class="name">Shag Strap</a>
-							<a href="javascript:;" class="image"><img alt="" src="/assets/img/user/user-14.jpg" /></a>
-							<div class="message">
-								Nullam iaculis pharetra pharetra. Proin sodales tristique sapien mattis placerat.
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="panel-footer">
-					<form name="send_message_form" data-id="message-form">
-						<div class="input-group">
-							<input type="text" class="form-control" name="message" placeholder="Enter your message here.">
-							<button class="btn btn-primary" type="button"><i class="fa fa-camera"></i></button>
-							<button class="btn btn-primary" type="button"><i class="fa fa-link"></i></button>
-						</div>
-					</form>
-				</div>
-			</div>
-			<!-- END panel -->
-		</div>
-		<!-- END col-4 -->
-		<!-- BEGIN col-4 -->
-		<div class="col-xl-4 col-lg-6">
-			<!-- BEGIN panel -->
-			<div class="panel panel-inverse" data-sortable-id="index-3">
-				<div class="panel-heading">
-					<h4 class="panel-title">Today's Schedule</h4>
-				</div>
-				<div id="schedule-calendar" class="datepickk"></div>
-				<hr class="m-0 bg-gray-500" />
-				<div class="list-group list-group-flush">
-					<a href="javascript:;" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-ellipsis">
-						Sales Reporting
-						<span class="badge bg-teal fs-10px">9:00 am</span>
-					</a> 
-					<a href="javascript:;" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-ellipsis rounded-bottom">
-						Have a meeting with sales team
-						<span class="badge bg-blue fs-10px">2:45 pm</span>
-					</a>
-				</div>
-			</div>
-			<!-- END panel -->
-		</div>
-		<!-- END col-4 -->
-		<!-- BEGIN col-4 -->
-		<div class="col-xl-4 col-lg-6">
-			<!-- BEGIN panel -->
-			<div class="panel panel-inverse" data-sortable-id="index-4">
-				<div class="panel-heading">
-					<h4 class="panel-title">New Registered Users</h4>
-					<span class="badge bg-teal">24 new users</span>
-				</div>
-				<ul class="registered-users-list">
-					<li>
-						<a href="javascript:;"><img src="/assets/img/user/user-5.jpg" alt="" /></a>
-						<h4 class="username text-ellipsis">
-							Savory Posh
-							<small>Algerian</small>
-						</h4>
-					</li>
-					<li>
-						<a href="javascript:;"><img src="/assets/img/user/user-3.jpg" alt="" /></a>
-						<h4 class="username text-ellipsis">
-							Ancient Caviar
-							<small>Korean</small>
-						</h4>
-					</li>
-					<li>
-						<a href="javascript:;"><img src="/assets/img/user/user-1.jpg" alt="" /></a>
-						<h4 class="username text-ellipsis">
-							Marble Lungs
-							<small>Indian</small>
-						</h4>
-					</li>
-					<li>
-						<a href="javascript:;"><img src="/assets/img/user/user-8.jpg" alt="" /></a>
-						<h4 class="username text-ellipsis">
-							Blank Bloke
-							<small>Japanese</small>
-						</h4>
-					</li>
-					<li>
-						<a href="javascript:;"><img src="/assets/img/user/user-2.jpg" alt="" /></a>
-						<h4 class="username text-ellipsis">
-							Hip Sculling
-							<small>Cuban</small>
-						</h4>
-					</li>
-					<li>
-						<a href="javascript:;"><img src="/assets/img/user/user-6.jpg" alt="" /></a>
-						<h4 class="username text-ellipsis">
-							Flat Moon
-							<small>Nepalese</small>
-						</h4>
-					</li>
-					<li>
-						<a href="javascript:;"><img src="/assets/img/user/user-4.jpg" alt="" /></a>
-						<h4 class="username text-ellipsis">
-							Packed Puffs
-							<small>Malaysian</small>
-						</h4>
-					</li>
-					<li>
-						<a href="javascript:;"><img src="/assets/img/user/user-9.jpg" alt="" /></a>
-						<h4 class="username text-ellipsis">
-							Clay Hike
-							<small>Swedish</small>
-						</h4>
-					</li>
-				</ul>
-				<div class="panel-footer text-center">
-					<a href="javascript:;" class="text-decoration-none text-dark">View All</a>
-				</div>
-			</div>
-			<!-- END panel -->
-		</div>
-		<!-- END col-4 -->
+
+
+	<!-- Collapsible Breakdown -->
+	<div class="collapse col-12 mb-4" id="zonalDetails">
+	    <div class="card card-body border shadow-sm">
+	        <h6 class="mb-2">Breakdown by Zone</h6>
+	        <ul class="list-group list-group-flush">
+	            @foreach($zoneBreakdown as $zone => $count)
+	                <li class="list-group-item d-flex justify-content-between align-items-center">
+	                    {{ $zone }}
+	                    <span class="badge bg-primary rounded-pill">{{ $count }}</span>
+	                </li>
+	            @endforeach
+	        </ul>
+	    </div>
 	</div>
-	<!-- END row -->
+
+	
+
+
+
+
+
+</div>
+
+<div class="row">
+
+    <!-- Total Today -->
+
+
+    <div class="col-xl-3 col-md-6 mb-2">
+	    <div class="card border-danger shadow-sm">
+	        <div class="card-body d-flex align-items-center justify-content-between">
+	            <div>
+	                <h6 class="card-title text-danger">
+	                    <i class="fas fa-calendar-day me-1"></i> Occurrences Submitted Today
+	                </h6>
+	                <h3>{{ $todaysOccurrences }}</h3>
+	            </div>
+	            <div>
+	                <span class="sparkline" data-values="3,2,4,1,5,3,4"></span>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+
+
+   <div class="col-xl-3 col-md-6 mb-2">
+	    <div class="card border-warning shadow-sm"
+	         data-bs-toggle="collapse"
+	         data-bs-target="#occurrenceTypeTable"
+	         style="cursor: pointer;">
+	        <div class="card-body d-flex align-items-center justify-content-between">
+	            <div>
+	                <h6 class="card-title text-warning">
+	                    <i class="fas fa-layer-group me-1"></i> Occurrences by Type
+	                </h6>
+	                <h3>{{ count($totalByType) ?? '—' }}</h3>
+	            </div>
+	            <div>
+	                <span class="sparkline" data-values="2,3,3,5,4,6,2"></span>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+
+	<div class="collapse col-12 mb-4" id="occurrenceTypeTable">
+	    <div class="card card-body border shadow-sm">
+	        <h6 class="mb-3 fw-bold">Breakdown – All Occurrences by Type</h6>
+	        <div class="table-responsive">
+	            <table class="table table-sm table-bordered align-middle mb-0">
+	                <thead class="table-light">
+	                    <tr>
+	                        <th>#</th>
+	                        <th>Type</th>
+	                        <th class="text-end">Total</th>
+	                    </tr>
+	                </thead>
+	                <tbody>
+	                    @forelse($totalByType as $index => $item)
+	                        <tr>
+	                            <td>{{ $index + 1 }}</td>
+	                            <td>{{ $item->occurrence_type }}</td>
+	                            <td class="text-end">{{ $item->total }}</td>
+	                        </tr>
+	                    @empty
+	                        <tr>
+	                            <td colspan="3" class="text-center text-muted">No occurrence types found.</td>
+	                        </tr>
+	                    @endforelse
+	                </tbody>
+	            </table>
+	        </div>
+	    </div>
+	</div>
+
+
+
+
+	<div class="col-xl-3 col-md-6 mb-2">
+        <div class="card border-success shadow-sm">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="card-title text-success"><i class="fas fa-user-check me-1"></i> Students Present Today</h6>
+                    <h3>{{ $totalToday }}</h3>
+                </div>
+                <div>
+                    <span class="sparkline" data-values="4,5,3,6,5,8,7"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Total This Week -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-primary shadow-sm">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="card-title text-primary"><i class="fas fa-calendar-week me-1"></i>Students Present This Week</h6>
+                    <h3>{{ $totalWeek }}</h3>
+                </div>
+                <div>
+                    <span class="sparkline" data-values="10,12,9,14,13,15,16"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- By Hostel -->
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-building me-1"></i> By Hostel (Today)
+            </div>
+            <ul class="list-group list-group-flush">
+                @foreach ($byHostel as $entry)
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ $entry->hostel->name }}
+                        <span class="badge bg-info">{{ $entry->total }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+
+    <!-- By Shift -->
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-clock me-1"></i> By Shift (Today)
+            </div>
+            <ul class="list-group list-group-flush">
+                @foreach ($byShift as $shift)
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ ucfirst($shift->shift) }}
+                        <span class="badge bg-warning text-dark">{{ $shift->total }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+
+    <!-- By Zone -->
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-map-marked-alt me-1"></i> By Zone (Today)
+            </div>
+            <ul class="list-group list-group-flush">
+                @foreach ($byZone as $zone)
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ $zone->name }}
+                        <span class="badge bg-secondary">{{ $zone->students_present }}</span>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<div class="card shadow-sm rounded-3 mb-4">
+    <div class="card-body">
+        <!-- Header and Filter -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
+            <h4 class="card-title mb-2 mb-md-0">📊 Student Attendance Statistics</h4>
+            <select id="periodFilter" class="form-select w-auto ms-md-3">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly" selected>Monthly</option>
+                <option value="yearly">Yearly</option>
+            </select>
+        </div>
+
+        <!-- Scrollable Chart -->
+        <div style="overflow-x: auto;">
+            <div id="studentChart" style="height: 350px; min-width: 600px;"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
 @endsection
+
+
+@push('scripts')
+
+<script>
+    $(function () {
+        $('.sparkline').each(function () {
+            const $this = $(this);
+            const values = $this.data('values').toString().split(',');
+            $this.sparkline(values, {
+                type: 'bar',
+                height: '30',
+                barColor: '#28a745',
+                barWidth: 5,
+                barSpacing: 2,
+            });
+        });
+    });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const chartEl = document.querySelector("#studentChart");
+    let chart;
+
+    function fetchChartData(period = 'monthly') {
+        fetch(`{{ route('student_statistics.chartData') }}?period=${period}`)
+            .then(res => res.json())
+            .then(data => {
+                const options = {
+                    chart: {
+                        type: 'line',
+                        height: 350,
+                        toolbar: { show: false }
+                    },
+                    series: [{
+                        name: 'Students Present',
+                        data: data.counts
+                    }],
+                    xaxis: {
+                        categories: data.labels
+                    },
+                    stroke: {
+                        curve: 'smooth'
+                    },
+                    markers: {
+                        size: 4
+                    },
+                    colors: ['#4e73df']
+                };
+
+                if (chart) {
+                    chart.updateOptions(options);
+                } else {
+                    chart = new ApexCharts(chartEl, options);
+                    chart.render();
+                }
+            });
+    }
+
+    fetchChartData();
+
+    document.getElementById('periodFilter').addEventListener('change', function () {
+        fetchChartData(this.value);
+    });
+});
+</script>
+
+
+
+@endpush

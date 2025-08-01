@@ -13,18 +13,44 @@ use Illuminate\Support\Facades\Storage;
 class OccurrenceController extends Controller
 {
 
-        public function index()
+       public function index(Request $request)
     {
-        $occurrences = Occurrence::with(['user', 'files'])->latest()->get();
+        $query = Occurrence::with(['user', 'files'])->latest();
+
+        // Check for unresolved filter
+        if ($request->filter === 'unresolved') {
+            $query->where('resolved', 'no');
+        }
+
+        $occurrences = $query->get();
 
         return view('occurrences.index', compact('occurrences'));
     }
 
 
+
     public function create()
     {
-        $hostels = Hostel::all();
-        return view('occurrences.create', compact('hostels'));
+        
+
+    $hostels = Hostel::all();
+
+    // Get distinct occurrence types from DB
+    $existingTypes = Occurrence::select('occurrence_type')
+    ->distinct()
+    ->whereNotNull('occurrence_type')
+    ->where('occurrence_type', '!=', '')
+    ->pluck('occurrence_type')
+    ->toArray();
+
+
+    // Filter to include only fire, theft, and other types
+    $defaultTypes = ['Fire', 'Theft'];
+    $additionalTypes = array_diff($existingTypes, $defaultTypes);
+    $occurrenceTypes = array_unique(array_merge($defaultTypes, $additionalTypes));
+
+    return view('occurrences.create', compact('hostels', 'occurrenceTypes'));
+
     }
 
     
@@ -41,9 +67,14 @@ class OccurrenceController extends Controller
                 'time' => 'required',
                 'nature' => 'required',
                 'action_taken' => 'required',
+                'occurrence_type' => 'required',
                 'resolution' => 'required',
+                'resolved' => 'required',
                 'attachments.*' => 'nullable|file|max:5120' // Max 5MB per file
             ]);
+
+           $occurrence_type = $request->occurrence_type === 'Other' ? $request->custom_nature : $request->occurrence_type;
+
 
             DB::beginTransaction();
 
@@ -54,6 +85,8 @@ class OccurrenceController extends Controller
                 'date' => $request->date,
                 'time' => $request->time,
                 'nature' => $request->nature,
+                'occurrence_type' => $occurrence_type,
+                'resolved' => $request->resolved,
                 'action_taken' => $request->action_taken,
                 'resolution' => $request->resolution
             ]);
@@ -121,8 +154,22 @@ class OccurrenceController extends Controller
     {
         $occurrence = Occurrence::with('files')->findOrFail($id);
         $hostels = Hostel::all(); // Make sure this model is imported
+        //$occurrenceTypes = ['theft', 'violence', 'fire', 'injury', 'accident']; // update with your actual types
+        $existingTypes = Occurrence::select('occurrence_type')
+        ->distinct()
+        ->whereNotNull('occurrence_type')
+        ->where('occurrence_type', '!=', '')
+        ->pluck('occurrence_type')
+        ->toArray();
 
-        return view('occurrences.edit', compact('occurrence', 'hostels'));
+
+    // Filter to include only fire, theft, and other types
+    $defaultTypes = ['Fire', 'Theft'];
+    $additionalTypes = array_diff($existingTypes, $defaultTypes);
+    $occurrenceTypes = array_unique(array_merge($defaultTypes, $additionalTypes));;
+
+
+        return view('occurrences.edit', compact('occurrence', 'hostels', 'occurrenceTypes'));
     }
 
     public function update(Request $request, $id)
@@ -130,27 +177,34 @@ class OccurrenceController extends Controller
         Log::info('Updating occurrence ID: ' . $id);
         
         try {
-            $request->validate([
+             $request->validate([
                 'shift' => 'required',
                 'location' => 'required',
                 'date' => 'required|date',
                 'time' => 'required',
                 'nature' => 'required',
                 'action_taken' => 'required',
+                'occurrence_type' => 'required',
                 'resolution' => 'required',
-                'attachment.*' => 'nullable|file|max:5120'
+                'resolved' => 'required',
+                'attachments.*' => 'nullable|file|max:5120' // Max 5MB per file
             ]);
+
+           $occurrence_type = $request->occurrence_type === 'Other' ? $request->custom_nature : $request->occurrence_type;
 
             DB::beginTransaction();
 
             $occurrence = Occurrence::findOrFail($id);
 
             $occurrence->update([
+               
                 'shift' => $request->shift,
                 'hostel' => $request->location,
                 'date' => $request->date,
                 'time' => $request->time,
                 'nature' => $request->nature,
+                'occurrence_type' => $occurrence_type,
+                'resolved' => $request->resolved,
                 'action_taken' => $request->action_taken,
                 'resolution' => $request->resolution
             ]);

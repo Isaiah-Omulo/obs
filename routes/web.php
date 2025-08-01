@@ -172,5 +172,7 @@ Route::prefix('student-statistics')->name('student_statistics.')->middleware('au
     Route::delete('/{studentStatistic}', [StudentStatisticController::class, 'destroy'])->name('destroy');
 
     // Optional: Show a single record (if needed)
-    Route::get('/{studentStatistic}', [StudentStatisticController::class, 'show'])->name('show');
+    //Route::get('/{studentStatistic}', [StudentStatisticController::class, 'show'])->name('show');
+    Route::get('/chart-data', [StudentStatisticController::class, 'chartData'])->name('chartData');
+
 });

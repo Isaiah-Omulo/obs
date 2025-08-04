@@ -21,4 +21,11 @@ class Occurrence extends Model
     {
         return $this->hasMany(File::class);
     }
+
+
+    public static function lastUsedHostelByUser($userId)
+    {
+        return self::where('user_id', $userId)->latest()->value('hostel');
+    }
+
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Zone;
 use App\Models\Hostel;
-
+use App\Models\StudentStatistic;
 
 
 class ZoneController extends Controller
@@ -88,7 +88,7 @@ class ZoneController extends Controller
         }
 
        // Store new hostel
-        public function hostelStore(Request $request)
+        public function hostelStore(Request $request) 
         {
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -96,14 +96,26 @@ class ZoneController extends Controller
                 'number_of_students' => 'required|integer|min:1'
             ]);
 
-            Hostel::create([
+            // Create hostel
+            $hostel = Hostel::create([
                 'zone_id' => $request->zone_id,
                 'name' => $request->name,
                 'number_of_students' => $request->number_of_students
             ]);
 
-            return redirect()->route('hostels.index')->with('success', 'Hostel created successfully.');
+            // Immediately create a StudentStatistic entry
+            StudentStatistic::create([
+                'user_id' => auth()->id(),
+                'hostel_id' => $hostel->id,
+                'record_date' => now()->toDateString(),       // today's date
+                'shift' => 'day',                             // or determine dynamically
+                'students_present' => $request->number_of_students,
+                'comments' => 'Initial hostel student count on creation.'
+            ]);
+
+            return redirect()->route('hostels.index')->with('success', 'Hostel created and statistics recorded.');
         }
+
 
 
         // Edit form for hostel

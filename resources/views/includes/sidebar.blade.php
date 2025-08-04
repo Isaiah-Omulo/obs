@@ -97,7 +97,15 @@
 					return [$subMenuHtml, $isChildActive];
 				}
 
-				foreach (config('sidebar.menu') as $menu) {
+				
+				$role = auth()->user()->role ?? '';
+				$sidebarMenu = in_array($role, ['house_keeper', 'hostel_attendant'])
+					    ? config('sidebar_attendant.menu')
+					    : config('sidebar.menu');
+
+
+				foreach ($sidebarMenu as $menu)
+				 {
 					$isParentActive = false;
 					$hasSub = !empty($menu['sub_menu']);
 					$isCurrentRouteActive = !empty($menu['route-name']) && Route::currentRouteName() == $menu['route-name'];

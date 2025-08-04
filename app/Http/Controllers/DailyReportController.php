@@ -28,7 +28,9 @@ class DailyReportController extends Controller
     {
         $user = Auth::user();
         $zones = Zone::all();
-        return view('daily_report.create', compact('user', 'zones'));
+        $userId = Auth::id();
+        $lastZone = DailyReport::lastUsedZoneByUser($userId);
+        return view('daily_report.create', compact('user', 'zones','lastZone'));
     }
 
     public function store(Request $request)

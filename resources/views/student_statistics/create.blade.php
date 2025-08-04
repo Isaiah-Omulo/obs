@@ -19,10 +19,13 @@
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-building"></i></span>
                         <select name="hostel_id" id="hostel_id" class="form-select" required>
-                            <option value="">Select Hostel</option>
+                        <option value="" disabled {{ $lastHostelId ? '' : 'selected' }}>-- Select Hostel --</option>
                             @foreach($hostels as $hostel)
-                                <option value="{{ $hostel->id }}">{{ $hostel->name }}</option>
+                                <option value="{{ $hostel->id }}" {{ $lastHostelId == $hostel->id ? 'selected' : '' }}>
+                                    {{ $hostel->name }}
+                                </option>
                             @endforeach
+
                         </select>
                     </div>
                 </div>

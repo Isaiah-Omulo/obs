@@ -35,7 +35,9 @@
                             <th>Shift</th>
                             <th>Students Present</th>
                             <th>Comments</th>
+                            @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
                             <th>Actions</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -48,6 +50,8 @@
                                 <td>{{ ucfirst($stat->shift) }}</td>
                                 <td>{{ $stat->students_present }}</td>
                                 <td>{{ $stat->comments ?? '-' }}</td>
+
+                                @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
                                 <td>
                                     <form id="delete-form-{{ $stat->id }}" action="{{ route('student_statistics.destroy', $stat->id) }}" method="POST">
                                         @csrf
@@ -57,6 +61,7 @@
                                         </button>
                                     </form>
                                 </td>
+                                @endif
 
                             </tr>
                         @empty

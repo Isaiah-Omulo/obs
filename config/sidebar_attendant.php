@@ -1,0 +1,21 @@
+<?php
+
+return [
+    'menu' => [
+        [
+            'icon'       => 'fa fa-tachometer-alt',
+            'title'      => 'Dashboard',
+            'route-name' => 'dashboard.attendant' // This is their dashboard route
+        ],
+        [
+            'icon'       => 'fa fa-book',
+            'title'      => 'Occurrence',
+            'route-name' => 'occurrence.index'
+        ],
+        [
+            'icon'       => 'fa fa-chart-bar',
+            'title'      => 'Student Statistics',
+            'route-name' => 'student_statistics.index'
+        ],
+    ],
+];

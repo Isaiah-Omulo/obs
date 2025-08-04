@@ -24,4 +24,8 @@ class DailyReport extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public static function lastUsedZoneByUser($userId) {
+        return self::where('user_id', $userId)->latest()->value('zone');
+    }
 }

@@ -7,7 +7,7 @@ use App\Models\Hostel;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\Auth;
 class StudentStatisticController extends Controller
 {
        public function index(Request $request)
@@ -27,7 +27,9 @@ class StudentStatisticController extends Controller
     public function create()
     {
         $hostels = Hostel::all();
-        return view('student_statistics.create', compact('hostels'));
+        $userId = Auth::id();
+        $lastHostelId = StudentStatistic::lastUsedHostelIdByUser($userId);
+        return view('student_statistics.create', compact('hostels', 'lastHostelId'));
     }
 
    public function store(Request $request)

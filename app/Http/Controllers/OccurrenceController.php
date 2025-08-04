@@ -8,7 +8,7 @@ use App\Models\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\Auth;
 
 class OccurrenceController extends Controller
 {
@@ -20,6 +20,14 @@ class OccurrenceController extends Controller
         // Check for unresolved filter
         if ($request->filter === 'unresolved') {
             $query->where('resolved', 'no');
+        }
+
+        if ($request->has('user_id')) {
+        $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->has('date')) {
+            $query->whereDate('date', $request->date);
         }
 
         $occurrences = $query->get();
@@ -35,6 +43,9 @@ class OccurrenceController extends Controller
 
     $hostels = Hostel::all();
 
+    $userId = Auth::id();
+    $lastHostel = Occurrence::lastUsedHostelByUser($userId);
+
     // Get distinct occurrence types from DB
     $existingTypes = Occurrence::select('occurrence_type')
     ->distinct()
@@ -49,7 +60,7 @@ class OccurrenceController extends Controller
     $additionalTypes = array_diff($existingTypes, $defaultTypes);
     $occurrenceTypes = array_unique(array_merge($defaultTypes, $additionalTypes));
 
-    return view('occurrences.create', compact('hostels', 'occurrenceTypes'));
+    return view('occurrences.create', compact('hostels', 'occurrenceTypes','lastHostel'));
 
     }
 

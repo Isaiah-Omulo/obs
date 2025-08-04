@@ -43,9 +43,9 @@
                         <div class="mb-3">
                             <label class="form-label" for="zone">Select Zone</label>
                             <select name="zone" id="zone" class="form-control select2" required>
-                                <option value="">-- Select Zone --</option>
-                                @foreach ($zones as $zone)
-                                    <option value="{{ $zone->name }}">{{ $zone->name }}</option>
+                            <option value="" disabled {{ $lastZone ? '' : 'selected' }}>-- Select Zone --</option>
+                                @foreach($zones as $zone)
+                                    <option value="{{ $zone->name }}" {{ $lastZone == $zone->name ? 'selected' : '' }}>{{ $zone->name }}</option>
                                 @endforeach
                             </select>
                             @error('zone') <small class="text-danger">{{ $message }}</small> @enderror

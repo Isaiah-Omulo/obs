@@ -27,7 +27,10 @@
         <table class="table table-striped table-bordered align-middle"  id="occurrencesTable">
             <thead class="table-dark">
                 <tr>
+
+                    @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
                     <th>Actions</th>
+                    @endif
                     <th>User</th>
                     <th>Shift</th>
                     <th>Hostel</th>
@@ -50,7 +53,9 @@
             </thead>
             <tbody>
                 @forelse($occurrences as $occurrence)
+
                     <tr id="occurrence-row-{{ $occurrence->id }}">
+                         @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
                         <td>
                             <div class="btn-group btn-group-sm" role="group" aria-label="Occurrence Actions">
                                 {{-- Edit --}}
@@ -94,6 +99,7 @@
                                </div>
                             </div>
                         </td>
+                        @endif
 
                         <td>{{ $occurrence->user->name ?? 'N/A' }}</td>
                         <td>{{ $occurrence->shift }}</td>

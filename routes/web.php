@@ -32,6 +32,13 @@ Route::get('/dashboard/v2', [MainController::class, 'dashboardV2'])
     ->name('dashboard-v2')
     ->middleware(['auth']); 
 
+Route::get('/dashboard/hostel-attendant', [MainController::class, 'hostelAttendantDashboard'])
+    ->name('dashboard.attendant')
+    ->middleware(['auth']);
+
+Route::get('/hostels/chart-data', [MainController::class, 'HostelChart'])
+    ->name('attendants.chartData')
+    ->middleware(['auth']);
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 

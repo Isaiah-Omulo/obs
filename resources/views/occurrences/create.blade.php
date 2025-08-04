@@ -56,9 +56,9 @@
                     <div class="mb-3">
                         <label>Hostel</label>
                         <select name="location" class="form-control" required>
-                            <option value="">Select Hostel</option>
-                            @foreach($hostels as $hostel)
-                                <option value="{{ $hostel->name }}" {{ (old('location', Auth::user()->assigned_location ?? '') == $hostel->name) ? 'selected' : '' }}>
+                        <option value="" disabled {{ $lastHostel ? '' : 'selected' }}>-- Select Hostel --</option>
+                           @foreach($hostels as $hostel)
+                                <option value="{{ $hostel->name }}" {{ $lastHostel == $hostel->name ? 'selected' : '' }}>
                                     {{ $hostel->name }}
                                 </option>
                             @endforeach

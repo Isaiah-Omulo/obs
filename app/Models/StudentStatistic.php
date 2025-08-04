@@ -26,4 +26,10 @@ class StudentStatistic extends Model
         return $this->belongsTo(User::class);
     }
 
+    // In StudentStatistic.php
+    public static function lastUsedHostelIdByUser($userId) 
+    {
+        return self::where('user_id', $userId)->latest()->value('hostel_id');
+    }
+
 }

@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-            Schema::create('feedback', function (Blueprint $table) {
-        $table->id();
-        $table->unsignedBigInteger('user_id')->nullable();
-        $table->string('subject');
-        $table->text('message');
-        $table->timestamps();
-    });
+       Schema::create('escalation_matrix', function (Blueprint $table) {
+            $table->id();
+            $table->string('department_name');
+            $table->string('email')->unique();
+            $table->timestamps();
+       });
 
     }
 
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('feedback');
+        Schema::dropIfExists('escalation_matrix');
     }
 };

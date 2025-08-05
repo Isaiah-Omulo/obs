@@ -28,9 +28,9 @@
             <thead class="table-dark">
                 <tr>
 
-                    @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
+                   
                     <th>Actions</th>
-                    @endif
+                    
                     <th>User</th>
                     <th>Shift</th>
                     <th>Hostel</th>
@@ -46,6 +46,8 @@
 
                     <th>Files</th>
                     @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
+                        <th>Zonal Officer</th>
+                        <th>Administrator</th>
                         <th>Manager</th>
                         <th>Director</th>
                     @endif
@@ -55,21 +57,21 @@
                 @forelse($occurrences as $occurrence)
 
                     <tr id="occurrence-row-{{ $occurrence->id }}">
-                         @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
-                        <td>
+                       <td>
                             <div class="btn-group btn-group-sm" role="group" aria-label="Occurrence Actions">
-                                {{-- Edit --}}
 
+                                {{-- Edit button (restricted to higher roles) --}}
+                                @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
                                 <div class="m-2">
-                                     <a href="{{ route('occurrence.edit', $occurrence->id) }}" class="btn btn-outline-primary" title="Edit Occurrence">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+                                    <a href="{{ route('occurrence.edit', $occurrence->id) }}" class="btn btn-outline-primary" title="Edit Occurrence">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
                                 </div>
-                               
-                                <div class="m-2">
-                                {{-- Add Input --}}
+                                @endif
 
-                                 @if (in_array(auth()->user()->role, ['manager', 'director']))
+                                {{-- Input button (only for manager or director) --}}
+                                @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
+                                <div class="m-2">
                                     <button class="btn btn-outline-info btn-add-input" 
                                             data-id="{{ $occurrence->id }}"
                                             data-role="{{ auth()->user()->role }}"
@@ -79,27 +81,34 @@
                                             data-bs-target="#inputModal">
                                         <i class="fas fa-comment-medical"></i>
                                     </button>
+                                </div>
                                 @endif
 
-
-
-                                
-                                </div>
-
+                                {{-- Delete button (restricted to higher roles) --}}
+                                @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
                                 <div class="m-2">
-
-                                   <button 
+                                    <button 
                                         class="btn btn-outline-danger btn-delete-occurrence" 
                                         data-id="{{ $occurrence->id }}"
                                         data-url="{{ route('occurrence.destroy', $occurrence->id) }}" 
                                         title="Delete Occurrence">
                                         <i class="fas fa-trash"></i>
                                     </button>
+                                </div>
+                                @endif
 
-                               </div>
+                                {{-- Escalate button (✅ VISIBLE TO ALL) --}}
+                                <div class="m-2">
+                                    <a href="{{ route('escalate.create', ['occurrence_id' => $occurrence->id]) }}"
+                                       class="btn btn-outline-warning"
+                                       title="Escalate this Occurrence">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </a>
+                                </div>
+
                             </div>
                         </td>
-                        @endif
+
 
                         <td>{{ $occurrence->user->name ?? 'N/A' }}</td>
                         <td>{{ $occurrence->shift }}</td>
@@ -127,6 +136,8 @@
                             @endif
                         </td>
                         @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
+                            <td id="zonal-officer-{{ $occurrence->id }}">{{ $occurrence->zonal_officer_input ?? '' }}</td>
+                            <td id="administrator-{{ $occurrence->id }}">{{ $occurrence->administrator_input ?? '' }}</td>
                             <td id="manager-{{ $occurrence->id }}">{{ $occurrence->manager_input ?? '' }}</td>
                             <td id="director-{{ $occurrence->id }}">{{ $occurrence->director_input ?? '' }}</td>
                         @endif
@@ -233,6 +244,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else if (role === 'director') {
                     document.getElementById(`director-${occurrenceId}`).innerText = inputText;
                 }
+
+                else if (role === 'zonal_officer') {
+                    document.getElementById(`zonal-officer-${occurrenceId}`).innerText = inputText;
+                }
+
+                else if (role === 'administrator' || role === 'coordinator') {
+                    document.getElementById(`administrator-${occurrenceId}`).innerText = inputText;
+                }
+
 
                 inputForm.reset();
                 bootstrap.Modal.getInstance(inputModal).hide();

@@ -9,6 +9,8 @@ use App\Http\Controllers\OtherController;
 use App\Http\Controllers\ZoneController;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\StudentStatisticController;
+use App\Http\Controllers\EscalationMatrixController;
+use App\Http\Controllers\EscalationController;
 
 Route::get('/', function () {
     Log::info("Home page: ");
@@ -182,4 +184,15 @@ Route::prefix('student-statistics')->name('student_statistics.')->middleware('au
     //Route::get('/{studentStatistic}', [StudentStatisticController::class, 'show'])->name('show');
     Route::get('/chart-data', [StudentStatisticController::class, 'chartData'])->name('chartData');
 
+});
+
+Route::prefix('escalation')->name('escalation.')->middleware('auth')->group(function () {
+    Route::get('/', [EscalationMatrixController::class, 'index'])->name('index');
+    Route::get('/create', [EscalationMatrixController::class, 'create'])->name('create');
+    Route::post('/store', [EscalationMatrixController::class, 'store'])->name('store');
+});
+
+Route::prefix('escalate')->name('escalate.')->middleware('auth')->group(function () {
+    Route::get('/', [EscalationController::class, 'create'])->name('create');
+    Route::post('/', [EscalationController::class, 'send'])->name('send');
 });

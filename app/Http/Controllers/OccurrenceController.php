@@ -265,8 +265,14 @@ class OccurrenceController extends Controller
 
     if ($request->role === 'manager') {
         $occurrence->manager_input = $request->input_text;
-    } else {
+    } else if ($request->role === 'director')  {
         $occurrence->director_input = $request->input_text;
+    }
+    else if ($request->role === 'zonal_officer')  {
+        $occurrence->zonal_officer_input = $request->input_text . "By ". auth()->user()->name;
+    }
+    else if ($request->role === 'director')  {
+        $occurrence->administrator_input = $request->input_text . "By ". auth()->user()->name;;
     }
 
     $occurrence->save();

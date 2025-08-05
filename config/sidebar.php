@@ -67,6 +67,11 @@ return [
             'route-name' => 'student_statistics.index'
           
         ],
+        [
+            'icon'     => 'fa fa-sitemap',
+            'title'    => 'Escalation Matrix',
+            'route-name' => 'escalation.index'  // Adjust this route name if needed
+        ],
 
         
     ],

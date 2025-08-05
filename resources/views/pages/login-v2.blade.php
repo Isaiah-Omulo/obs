@@ -147,6 +147,15 @@
         </div>
         <!-- END login-cover -->
 
+         @if ($errors->has('google_login'))
+            <div class="alert alert-danger">
+                {{ $errors->first('google_login') }}
+            </div>
+        @endif
+
+
+
+
         <!-- BEGIN login-container -->
         <div class="login-container">
             <!-- BEGIN login-header -->

@@ -94,7 +94,7 @@ Route::prefix('occurrence')->name('occurrence.')->middleware('auth')->group(func
 
 Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/', [UserController::class, 'index'])->name('user.index');
-    Route::get('/edit', [UserController::class, 'edit'])->name('user.edit');
+    Route::get('/{id}/edit', [UserController::class, 'edit'])->name('user.edit');
     Route::put('/update', [UserController::class, 'update'])->name('user.update');
     Route::get('/create', [UserController::class, 'create'])->name('user.create');
     Route::post('/store', [UserController::class, 'store'])->name('user.store');

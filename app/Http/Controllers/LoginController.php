@@ -59,41 +59,77 @@ class LoginController extends Controller
         return Socialite::driver('google')->redirect();
     }
 
-   public function handleGoogleCallback()
-{
-    try {
-        $googleUser = Socialite::driver('google')->stateless()->user();
+       /*
+       public function handleGoogleCallback()
+        {
+            try {
+                $googleUser = Socialite::driver('google')->stateless()->user();
 
-        // Find user by email
-        $user = User::where('email', $googleUser->getEmail())->first();
+                // Find user by email
+                $user = User::where('email', $googleUser->getEmail())->first();
 
-        if (!$user) {
-            // Create new user if not found
-            $user = User::create([
-                'name' => $googleUser->getName(),
-                'email' => $googleUser->getEmail(),
-                'password' => bcrypt(str()->random(16)), // dummy password
-                'email_verified_at' => now(),
-                'google_id' => $googleUser->getId(),
-                'logged_in_at' => now(),
-            ]);
+                if (!$user) {
+                    // Create new user if not found
+                    $user = User::create([
+                        'name' => $googleUser->getName(),
+                        'email' => $googleUser->getEmail(),
+                        'password' => bcrypt(str()->random(16)), // dummy password
+                        'email_verified_at' => now(),
+                        'google_id' => $googleUser->getId(),
+                        'logged_in_at' => now(),
+                    ]);
+                }
+                 else {
+                    // Update logged_in_at for existing user
+                    $user->update(['logged_in_at' => now()]);
+                }
+
+                // Log the user in
+               Auth::login($user);
+
+                return redirect()->intended('/dashboard/v2');
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+                return redirect('/login')->withErrors([
+                    'google_login' => 'Google login failed: ' . $e->getMessage(),
+                ]);
+            }
+        }*/
+
+        public function handleGoogleCallback()
+        {
+            try {
+                $googleUser = Socialite::driver('google')->stateless()->user();
+
+                // Find user by email
+                $user = User::where('email', $googleUser->getEmail())->first();
+
+                if (!$user) {
+                    // If user doesn't exist, deny access
+                    return redirect('/login')->withErrors([
+                        'google_login' => 'Access denied. Your email is not registered in the system. Please contact the Director or Manager to be registered.',
+                    ]);
+                }
+
+                // Optional: update name, google_id, and last login timestamp
+                $user->update([
+                    'name' => $googleUser->getName(),
+                    'google_id' => $googleUser->getId(),
+                    'logged_in_at' => now(),
+                ]);
+
+                // Log the user in
+                Auth::login($user);
+
+                return redirect()->intended('/dashboard/v2');
+            } catch (\Exception $e) {
+                Log::error($e->getMessage());
+                return redirect('/login')->withErrors([
+                    'google_login' => 'Google login failed: ' . $e->getMessage(),
+                ]);
+            }
         }
-         else {
-            // Update logged_in_at for existing user
-            $user->update(['logged_in_at' => now()]);
-        }
 
-        // Log the user in
-       Auth::login($user);
-
-        return redirect()->intended('/dashboard/v2');
-    } catch (\Exception $e) {
-        Log::error($e->getMessage());
-        return redirect('/login')->withErrors([
-            'google_login' => 'Google login failed: ' . $e->getMessage(),
-        ]);
-    }
-}
 
 
 

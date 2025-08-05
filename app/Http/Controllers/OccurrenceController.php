@@ -260,7 +260,7 @@ class OccurrenceController extends Controller
 {
     $request->validate([
         'input_text' => 'required|string',
-        'role' => 'required|in:manager,director',
+        'role' => 'required|in:manager,director,zonal_officer,administrator,coordinator'
     ]);
 
     if ($request->role === 'manager') {
@@ -269,10 +269,10 @@ class OccurrenceController extends Controller
         $occurrence->director_input = $request->input_text;
     }
     else if ($request->role === 'zonal_officer')  {
-        $occurrence->zonal_officer_input = $request->input_text . "By ". auth()->user()->name;
+        $occurrence->zonal_officer_input = $request->input_text . ":By ". auth()->user()->name;
     }
-    else if ($request->role === 'director')  {
-        $occurrence->administrator_input = $request->input_text . "By ". auth()->user()->name;;
+    else if ($request->role === 'administrator' || $request->role === 'coordinator' )  {
+        $occurrence->administrator_input = $request->input_text . ":By ". auth()->user()->name;
     }
 
     $occurrence->save();

@@ -82,7 +82,7 @@
                                 </td>
                                 <td>{{ $user->created_at->format('d M Y, H:i') }}</td>
                                 <td class="text-center">
-                                     <a href="{{ route('user.edit', $user->id) }}" class="btn btn-primary btn-sm">
+                                     <a href="{{ route('user.edit', ['id' => $user->id]) }}" class="btn btn-primary btn-sm">
                                         <i class="fa fa-edit"></i> Edit
                                     </a>
                                 <button class="btn btn-danger btn-sm btn-delete-user" 

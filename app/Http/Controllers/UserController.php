@@ -13,6 +13,12 @@ class UserController extends Controller
     {
         $usersQuery = User::query();
 
+         $disallowedRoles = ['hostel_attendant', 'house_keeper'];
+
+            if (in_array(auth()->user()->role, $disallowedRoles)) {
+                abort(403, 'Unauthorized action.');
+            }
+
         if ($request->filter === 'hostel') {
             $usersQuery->whereIn('role', ['hostel_attendant', 'house_keeper']);
         }
@@ -23,33 +29,53 @@ class UserController extends Controller
     }
 
 
-    public function edit()
+    public function edit($id)
     {
-        $user = Auth::user();
+        $authUser = Auth::user();
+
+        // If hostel_attendant or house_keeper, only allow editing their own profile
+        if (in_array($authUser->role, ['hostel_attendant', 'house_keeper']) && $authUser->id != $id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $user = User::findOrFail($id);
         return view('user.edit', compact('user'));
     }
 
-    public function update(Request $request)
+
+   public function update(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . Auth::id(),
             'phone' => 'nullable|string|max:20',
-            'role' => 'required|string',
+            'role' => 'nullable|string',
         ]);
 
         $user = Auth::user();
-        $user->update($request->only(['name', 'email', 'phone', 'role']));
+
+        // Use the current role if none is submitted
+        $data = $request->only(['name', 'email', 'phone']);
+        $data['role'] = $request->input('role', $user->role);
+
+        $user->update($data);
 
         return back()->with('success', 'Profile updated successfully!');
     }
+
 
 
     
 
     public function create()
     {
-        return view('user.create');
+       
+         $disallowedRoles = ['hostel_attendant', 'house_keeper'];
+
+            if (in_array(auth()->user()->role, $disallowedRoles)) {
+                abort(403, 'Unauthorized action.');
+            }
+            return view('user.create');
     }
 
     public function store(Request $request)

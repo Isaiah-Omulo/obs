@@ -27,7 +27,7 @@
 			</div>
 			<div id="appSidebarProfileMenu" class="collapse">
 				<div class="menu-item pt-5px">
-				<a href="{{ route('user.edit', auth()->user()->id) }}" class="menu-link">
+				<a href="{{ route('user.edit',  ['id' =>auth()->user()->id] ) }}" class="menu-link">
 					<div class="menu-icon"><i class="fa fa-cog"></i></div>
 					<div class="menu-text">Settings</div>
 				</a>

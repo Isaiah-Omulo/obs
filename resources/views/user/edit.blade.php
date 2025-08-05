@@ -1,6 +1,12 @@
 @extends('layouts.default')
 @section('title', 'Update User')
 
+
+@php
+    $isManagerOrDirector = in_array(auth()->user()->role, ['manager', 'director']);
+@endphp
+
+
 @section('content')
 <div class="container-fluid">
     <!-- begin row -->
@@ -62,20 +68,23 @@
                             @error('phone') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label" for="role">Role</label>
-                            <select id="role" name="role" class="form-control select2" required>
-                                <option value="">Select a role</option>
-                                <option value="house_keeper" {{ old('role', $user->role) == 'house_keeper' ? 'selected' : '' }}>House Keeper</option>
-                                <option value="hostel_attendant" {{ old('role', $user->role) == 'hostel_attendant' ? 'selected' : '' }}>Hostel Attendant</option>
-                                <option value="administrator" {{ old('role', $user->role) == 'administrator' ? 'selected' : '' }}>Administrator</option>
-                                <option value="coordinator" {{ old('role', $user->role) == 'coordinator' ? 'selected' : '' }}>Coordinator</option>
-                                <option value="zonal_officer" {{ old('role', $user->role) == 'zonal_officer' ? 'selected' : '' }}>Zonal Officer</option>
-                                <option value="director" {{ old('role', $user->role) == 'director' ? 'selected' : '' }}>Director</option>
-                                <option value="manager" {{ old('role', $user->role) == 'manager' ? 'selected' : '' }}>Manager</option>
-                            </select>
-                            @error('role') <small class="text-danger">{{ $message }}</small> @enderror
-                        </div>
+                        @if ($isManagerOrDirector)
+                            <div class="mb-3">
+                                <label class="form-label" for="role">Role</label>
+                                <select id="role" name="role" class="form-control select2" required>
+                                    <option value="">Select a role</option>
+                                    <option value="house_keeper" {{ old('role', $user->role) == 'house_keeper' ? 'selected' : '' }}>House Keeper</option>
+                                    <option value="hostel_attendant" {{ old('role', $user->role) == 'hostel_attendant' ? 'selected' : '' }}>Hostel Attendant</option>
+                                    <option value="administrator" {{ old('role', $user->role) == 'administrator' ? 'selected' : '' }}>Administrator</option>
+                                    <option value="coordinator" {{ old('role', $user->role) == 'coordinator' ? 'selected' : '' }}>Coordinator</option>
+                                    <option value="zonal_officer" {{ old('role', $user->role) == 'zonal_officer' ? 'selected' : '' }}>Zonal Officer</option>
+                                    <option value="director" {{ old('role', $user->role) == 'director' ? 'selected' : '' }}>Director</option>
+                                    <option value="manager" {{ old('role', $user->role) == 'manager' ? 'selected' : '' }}>Manager</option>
+                                </select>
+                                @error('role') <small class="text-danger">{{ $message }}</small> @enderror
+                            </div>
+                        @endif
+
 
                         <button type="submit" class="btn btn-primary w-100">Update User</button>
                     </form>

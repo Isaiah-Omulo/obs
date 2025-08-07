@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
+use Spatie\Activitylog\Models\Activity;
+
 
 class OccurrenceController extends Controller
 {
@@ -75,11 +80,12 @@ class OccurrenceController extends Controller
                 'shift' => 'required',
                 'location' => 'required',
                 'date' => 'required|date',
-                'time' => 'required',
+                'time_of_reporting' => 'required',
                 'nature' => 'required',
                 'action_taken' => 'required',
                 'occurrence_type' => 'required',
                 'resolution' => 'required',
+                'time_of_occurrence' => 'required',
                 'resolved' => 'required',
                 'attachments.*' => 'nullable|file|max:5120' // Max 5MB per file
             ]);
@@ -94,12 +100,13 @@ class OccurrenceController extends Controller
                 'shift' => $request->shift,
                 'hostel' => $request->location,
                 'date' => $request->date,
-                'time' => $request->time,
+                'time_of_reporting' => date('H:i:s', strtotime($request->time)),
                 'nature' => $request->nature,
                 'occurrence_type' => $occurrence_type,
                 'resolved' => $request->resolved,
                 'action_taken' => $request->action_taken,
-                'resolution' => $request->resolution
+                'resolution' => $request->resolution,
+                'time_of_occurrence' => $request->time_of_occurrence
             ]);
 
             Log::info('Occurrence created:', ['id' => $occurrence->id]);
@@ -122,6 +129,16 @@ class OccurrenceController extends Controller
 
 
             DB::commit();
+                activity()
+                ->performedOn($occurrence)
+                ->event('created')
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'hostel' => $occurrence->hostel,
+                    'nature' => $occurrence->nature,
+                    'occurrence_type' => $occurrence->occurrence_type,
+                ])
+                ->log(auth()->user()->name.' created a new occurrence');
 
             return redirect()->route('occurrence.index')->with('success', 'Occurrence logged successfully.');
         } catch (\Exception $e) {
@@ -260,7 +277,7 @@ class OccurrenceController extends Controller
 {
     $request->validate([
         'input_text' => 'required|string',
-        'role' => 'required|in:manager,director,zonal_officer,administrator,coordinator'
+        'role' => 'required|in:manager,director,zonal_officer,administrator,coordinator,house_keeper,hostel_attendant'
     ]);
 
     if ($request->role === 'manager') {
@@ -273,6 +290,10 @@ class OccurrenceController extends Controller
     }
     else if ($request->role === 'administrator' || $request->role === 'coordinator' )  {
         $occurrence->administrator_input = $request->input_text . ":By ". auth()->user()->name;
+    }
+
+    else if ($request->role === 'house_keeper' || $request->role === 'hostel_attendant' )  {
+        $occurrence->hostel_input = $request->input_text . ":By ". auth()->user()->name;
     }
 
     $occurrence->save();

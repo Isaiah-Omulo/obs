@@ -35,7 +35,8 @@
                     <th>Shift</th>
                     <th>Hostel</th>
                     <th>Date</th>
-                    <th>Time</th>
+                    <th>Reporting Time</th>
+                    <th>Occurrence Time</th>
                     <th>Occurrence Type</th>
                     <th>Nature of Occurrence</th>
                     <th>Action Taken</th>
@@ -45,12 +46,12 @@
                     
 
                     <th>Files</th>
-                    @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
+                        <th>Hostel</th>
                         <th>Zonal Officer</th>
                         <th>Administrator</th>
                         <th>Manager</th>
                         <th>Director</th>
-                    @endif
+                   
                 </tr>
             </thead>
             <tbody>
@@ -60,7 +61,7 @@
                        <td>
                             <div class="btn-group btn-group-sm" role="group" aria-label="Occurrence Actions">
 
-                                {{-- Edit button (restricted to higher roles) --}}
+                                {{-- Edit button (restricted to higher roles) 
                                 @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
                                 <div class="m-2">
                                     <a href="{{ route('occurrence.edit', $occurrence->id) }}" class="btn btn-outline-primary" title="Edit Occurrence">
@@ -68,9 +69,10 @@
                                     </a>
                                 </div>
                                 @endif
+                                --}}
 
                                 {{-- Input button (only for manager or director) --}}
-                                @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
+                              
                                 <div class="m-2">
                                     <button class="btn btn-outline-info btn-add-input" 
                                             data-id="{{ $occurrence->id }}"
@@ -82,9 +84,9 @@
                                         <i class="fas fa-comment-medical"></i>
                                     </button>
                                 </div>
-                                @endif
+                                
 
-                                {{-- Delete button (restricted to higher roles) --}}
+                                {{-- Delete button (restricted to higher roles) 
                                 @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
                                 <div class="m-2">
                                     <button 
@@ -96,10 +98,11 @@
                                     </button>
                                 </div>
                                 @endif
+                                --}}
 
                                 {{-- Escalate button (✅ VISIBLE TO ALL) --}}
                                 <div class="m-2">
-                                    <a href="{{ route('escalate.create', ['occurrence_id' => $occurrence->id]) }}"
+                                    <a href="{{ route('escalate.create', ['id' => $occurrence->id]) }}"
                                        class="btn btn-outline-warning"
                                        title="Escalate this Occurrence">
                                         <i class="fas fa-exclamation-triangle"></i>
@@ -114,7 +117,8 @@
                         <td>{{ $occurrence->shift }}</td>
                         <td>{{ $occurrence->hostel }}</td>
                         <td>{{ $occurrence->date }}</td>
-                        <td>{{ $occurrence->time }}</td>
+                        <td>{{ $occurrence->time_of_reporting }}</td>
+                        <td>{{ $occurrence->time_of_occurrence }}</td>
                         <td>{{ $occurrence->occurrence_type }}</td>
                         <td>{{ $occurrence->nature }}</td>
                         <td>{{ $occurrence->action_taken }}</td>
@@ -135,12 +139,14 @@
                                 <span class="text-muted">None</span>
                             @endif
                         </td>
-                        @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
+
+                            <td id="hostel-{{ $occurrence->id }}">{{ $occurrence->hostel_input ?? '' }}</td>
+                        
                             <td id="zonal-officer-{{ $occurrence->id }}">{{ $occurrence->zonal_officer_input ?? '' }}</td>
                             <td id="administrator-{{ $occurrence->id }}">{{ $occurrence->administrator_input ?? '' }}</td>
                             <td id="manager-{{ $occurrence->id }}">{{ $occurrence->manager_input ?? '' }}</td>
                             <td id="director-{{ $occurrence->id }}">{{ $occurrence->director_input ?? '' }}</td>
-                        @endif
+                        
 
 
                 @empty
@@ -251,6 +257,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 else if (role === 'administrator' || role === 'coordinator') {
                     document.getElementById(`administrator-${occurrenceId}`).innerText = inputText;
+                }
+
+                 else if (role === 'house_keeper' || role === 'hostel_attendant') {
+                    document.getElementById(`hostel-${occurrenceId}`).innerText = inputText;
                 }
 
 

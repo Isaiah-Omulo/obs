@@ -12,6 +12,9 @@ use App\Http\Controllers\StudentStatisticController;
 use App\Http\Controllers\EscalationMatrixController;
 use App\Http\Controllers\EscalationController;
 
+use App\Http\Controllers\HandoverTakeoverController;
+
+
 Route::get('/', function () {
     Log::info("Home page: ");
     if (!Auth::check()) {
@@ -137,7 +140,7 @@ Route::middleware(['auth'])->prefix('zones')->group(function () {
 Route::prefix('daily-reports')->name('daily_reports.')->middleware('auth')->group(function () {
     // List all reports
     Route::get('/', [DailyReportController::class, 'index'])->name('index');
-
+    Route::get('/all', [DailyReportController::class, 'all'])->name('all');
     // Create form
     Route::get('/create', [DailyReportController::class, 'create'])->name('create');
 
@@ -193,6 +196,18 @@ Route::prefix('escalation')->name('escalation.')->middleware('auth')->group(func
 });
 
 Route::prefix('escalate')->name('escalate.')->middleware('auth')->group(function () {
-    Route::get('/', [EscalationController::class, 'create'])->name('create');
+     Route::get('/all', [EscalationController::class, 'all'])->name('all');
+    Route::get('/{id}', [EscalationController::class, 'create'])->name('create');
     Route::post('/', [EscalationController::class, 'send'])->name('send');
+
+
+});
+
+Route::prefix('takeover')->name('takeover.')->middleware('auth')->group(function () {
+
+    Route::get('/changeovers', [HandoverTakeoverController::class, 'index'])->name('index');
+    Route::get('/all', [HandoverTakeoverController::class, 'all'])->name('all'); 
+           // List all handovers/takeovers
+    Route::get('/create', [HandoverTakeoverController::class, 'create'])->name('create'); // Show form to take over a specific item
+    Route::post('/', [HandoverTakeoverController::class, 'store'])->name('store');      // Store the takeover action
 });

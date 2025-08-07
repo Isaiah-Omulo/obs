@@ -48,6 +48,10 @@ return [
             'title'    => 'Reports',
             'sub_menu' => [
                 [
+                    'title'      => 'All Reports',
+                    'route-name' => 'daily_reports.all'
+                ],
+                [
                     'title'      => 'Add',
                     'route-name' => 'daily_reports.create'
                 ],
@@ -70,11 +74,24 @@ return [
         [
             'icon'     => 'fa fa-sitemap',
             'title'    => 'Escalation Matrix',
-            'route-name' => 'escalation.index'  // Adjust this route name if needed
+            'route-name' => 'escalation.index' 
+        ],
+
+        [
+            'icon'     => 'fas fa-exclamation-triangle',
+            'title'    => 'Escalations',
+            'route-name' => 'escalate.all' 
+        ],
+
+         [
+            'icon'     => 'fa fa-people-arrows',
+            'title'    => 'Handover/Takeover',
+            'route-name' => 'takeover.create' 
         ],
 
         
     ],
+   
    
 
 ];

@@ -22,6 +22,25 @@
 							<div class="menu-caret ms-auto"></div>
 						</div>
 						<small>{{ ucfirst(str_replace('_', ' ', auth()->user()->role)) }}</small>
+						<br>
+						<small 
+						    x-data="{ time: '' }" 
+						    x-init="
+						        setInterval(() => {
+						            const formatter = new Intl.DateTimeFormat('en-US', {
+						                timeZone: 'Africa/Nairobi',
+						                hour: 'numeric',
+						                minute: 'numeric',
+						                second: 'numeric',
+						                hour12: true
+						            });
+						            time = 'Current Time: ' + formatter.format(new Date());
+						        }, 1000);
+						    " 
+						    x-text="time">
+						    Current Time: --:-- --
+						</small>
+
 					</div>
 				</a>
 			</div>
@@ -155,3 +174,24 @@
 <div class="app-sidebar-bg"{{ $appSidebarAttr }}></div>
 <div class="app-sidebar-mobile-backdrop"><a href="#" data-dismiss="app-sidebar-mobile" class="stretched-link"></a></div>
 <!-- END #sidebar -->
+
+<script>
+  function updateNairobiTime() {
+    // Get the current time in Nairobi (UTC+3)
+    const options = {
+      timeZone: 'Africa/Nairobi',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    };
+
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const timeString = formatter.format(new Date());
+
+    document.getElementById('currentTime').innerText = 'Current Time: ' + timeString;
+  }
+
+  // Update time immediately and every minute
+  updateNairobiTime();
+  setInterval(updateNairobiTime, 60000); // update every 60 seconds
+</script>

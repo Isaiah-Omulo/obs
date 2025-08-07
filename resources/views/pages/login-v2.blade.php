@@ -157,37 +157,52 @@
 
 
         <!-- BEGIN login-container -->
-        <div class="login-container">
-            <!-- BEGIN login-header -->
-            <div class="login-header">
-                <div class="brand">
-                    <img src="{{ asset('images/icon_ku_bg.png') }}" class="img-fluid" alt="University Logo">
-                    <div class="brand-title">Kenyatta University</div>
-                    <div class="brand-subtitle">Occurrence Book System</div>
-                </div>
-            </div>
-            <!-- END login-header -->
+        @php
+            $year = date('Y');
+        @endphp
 
-            <!-- BEGIN login-content -->
-            <div class="login-content">
-                @if ($errors->has('google'))
-                    <div class="alert alert-danger text-center">
-                        {{ $errors->first('google') }}
+        <div class="d-flex justify-content-center align-items-center vh-100" style="background: linear-gradient(135deg, #f8f9fa, #e0e7ff);">
+            <div class="card shadow-lg rounded-4 border-0 p-4 px-4 py-5 animate__animated animate__fadeIn" style="max-width: 420px; width: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);">
+                
+                <!-- BEGIN login-header -->
+                <div class="text-center mb-4">
+                    <img src="{{ asset('images/icon_ku_bg.png') }}" alt="University Logo" class="img-fluid mb-3" style="max-height: 70px;">
+                    <h4 class="fw-bold mb-0 text-dark">Kenyatta University</h4>
+                    <p class="text-muted small">Accommodation Services Occurrence Booking System</p>
+                </div>
+                <!-- END login-header -->
+
+                <!-- BEGIN login-content -->
+                <div class="login-content">
+                    @if ($errors->has('google'))
+                        <div class="alert alert-danger text-center">
+                            {{ $errors->first('google') }}
+                        </div>
+                    @endif
+
+                    <div class="mb-3">
+                        <a href="{{ route('login.google') }}"
+                           class="btn btn-danger w-100 btn-lg d-flex align-items-center justify-content-center gap-2 shadow-sm"
+                           style="transition: all 0.2s ease-in-out;">
+                            <i class="fab fa-google fa-lg"></i> <span>Continue with Google</span>
+                        </a>
                     </div>
-                @endif
 
-                <div class="mb-3">
-                    <a href="{{ route('login.google') }}" class="btn btn-danger w-100 btn-lg d-flex align-items-center justify-content-center gap-2">
-                        <i class="fab fa-google fa-lg"></i> Continue with Google
-                    </a>
+                    <div class="text-center text-muted small">
+                        You will be redirected to the Google login page.
+                    </div>
                 </div>
+                <!-- END login-content -->
 
-                <div class="text-center text-gray-500">
-                    You will be redirected to the Google login page.
+                <!-- BEGIN footer -->
+                <div class="mt-4 pt-3 border-top text-center text-muted small">
+                    <p class="mb-0">&copy; <span id="year">{{ $year }}</span> Kenyatta University. All rights reserved.</p>
                 </div>
+                <!-- END footer -->
             </div>
-            <!-- END login-content -->
         </div>
+
+
         <!-- END login-container -->
     </div>
     <!-- END login -->

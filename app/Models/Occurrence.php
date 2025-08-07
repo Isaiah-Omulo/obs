@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Occurrence extends Model
 {
     protected $fillable = [
-    'user_id', 'shift','hostel', 'date', 'time', 'nature','occurrence_type','action_taken', 'resolution','resolved', 'zonal_officer_input', 'administrator_input', 'manager_input', 'director_input'
+    'user_id', 'shift','hostel', 'date', 'time_of_reporting', 'nature','occurrence_type','action_taken', 'resolution','resolved', 'zonal_officer_input', 'administrator_input', 'manager_input', 'director_input', 'hostel_input','time_of_occurrence'
     ];
 
     public function user()

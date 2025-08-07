@@ -5,6 +5,7 @@
 
 @push('styles')
 
+
 <style>
 .is-invalid {
     border-color: #dc3545;
@@ -13,6 +14,12 @@
 
 @endpush
 
+@php
+    date_default_timezone_set('Africa/Nairobi');
+    $currentTimestamp = date('Y-m-d\TH:i:s'); // format for datetime-local input
+@endphp
+
+
 @section('content')
 <div class="container mt-4">
 
@@ -20,6 +27,8 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="mb-0">Report New Occurrence</h4>
         <a href="{{ route('occurrence.index') }}" class="btn btn-outline-secondary btn-sm">All Occurrences</a>
+      
+        {{$currentTimestamp}}
     </div>
 
     <!-- Multi-Step Panel -->
@@ -75,8 +84,29 @@
                     </div>
 
                     <div class="mb-3">
-                        <label>Time of Occurrence</label>
-                        <input type="time" name="time" class="form-control" required>
+                        <label>Time of Reporting</label>
+                        <input type="time" name="time_of_reporting" id="timepicker"  class="form-control" required>
+
+                       
+                    </div>
+
+
+                    <div class="mb-3">
+                        <label  x-data="{ time: '' }" 
+                            x-init="
+                                setInterval(() => {
+                                    const formatter = new Intl.DateTimeFormat('en-US', {
+                                        timeZone: 'Africa/Nairobi',
+                                        hour: 'numeric',
+                                        minute: 'numeric',
+                                        second: 'numeric',
+                                        hour12: true
+                                    });
+                                    time = 'Recorded At (System Time): ' + formatter.format(new Date());
+                                }, 1000);
+                            " 
+                            x-text="time">Time of Occurrence/Recorded At: </label>
+                        <input  type="hidden" name="time_of_occurrence" class="form-control" value="{{ $currentTimestamp }}" readonly required>
                     </div>
                     
 
@@ -143,8 +173,13 @@
     </div>
 </div>
 
+@endsection
+
 <!-- Step-by-step logic -->
 @push('scripts')
+
+
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const steps = document.querySelectorAll('.form-step');
@@ -240,5 +275,80 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 </script>
 
+
+<script>
+  flatpickr("#timepicker", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "h:i K", // 12-hour format with AM/PM
+    time_24hr: false
+  });
+</script>
+
+<script>
+  function updateNairobiTime() {
+    const options = {
+      timeZone: 'Africa/Nairobi',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric', // add seconds
+      hour12: true
+    };
+
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const timeString = formatter.format(new Date());
+
+    document.getElementById('currentTime').innerText = "Hi";
+
+    console.log("Time is: " + timeString);
+
+    const currentTimeEl = document.getElementById('currentTime');
+      if (currentTimeEl) {
+        currentTimeEl.innerText = 'Current Time: ' + timeString;
+         console.log("There we go");
+
+      } else {
+        console.log("❌ Element with ID 'currentTime' not found!");
+      }
+
+
+  }
+
+  updateNairobiTime();
+  setInterval(updateNairobiTime, 1000); // update every second
+
+
+  
+    
+</script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    function updateNairobiTime() {
+      const options = {
+        timeZone: 'Africa/Nairobi',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: true
+      };
+
+      const formatter = new Intl.DateTimeFormat('en-US', options);
+      const timeString = formatter.format(new Date());
+
+      const currentTimeEl = document.getElementById('currentTime');
+      if (currentTimeEl) {
+        currentTimeEl.innerText = 'Current Time: ' + timeString;
+        console.log("✅ Time updated:", timeString);
+      } else {
+        console.warn("❌ #currentTime element not found.");
+      }
+    }
+
+    updateNairobiTime();
+    setInterval(updateNairobiTime, 1000); // every second
+  });
+</script>
+
 @endpush
-@endsection

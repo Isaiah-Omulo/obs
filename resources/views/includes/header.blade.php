@@ -19,6 +19,33 @@ if (Auth::check()) {
 @endphp
 
 
+@push('styles')
+
+<style>
+
+.line {
+  height: 2px;
+  width: 120px;
+  background-color: #6c757d; /* Bootstrap secondary */
+  border-radius: 5px;
+  transition: width 0.4s ease-in-out;
+}
+
+.title-animate:hover .line {
+  width: 150px; /* Optional: slight animation on hover */
+}
+
+.title-animate {
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+ </style>   
+@endpush
 
 
 
@@ -61,9 +88,15 @@ if (Auth::check()) {
 
             <!-- Center Title -->
             <!-- Add class to trigger animation -->
-            <div class="text-center flex-grow-1 title-animate">
-                <h1 class="m-0 fs-4 text-primary">Occurrence Book System</h1>
+          <div class="text-center py-4 animate__animated animate__fadeInDown">
+              <h1 class="fw-semibold fs-4 text-primary-emphasis mb-0">
+                Accommodation Services: <span class="text-secondary fw-bold">Occurrence Booking System</span>
+              </h1>
             </div>
+
+
+
+
 
 
           

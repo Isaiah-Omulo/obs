@@ -23,6 +23,14 @@ class DailyReportController extends Controller
         return view('daily_report.index', compact('dailyReports'));
     }
 
+    public function all()
+    {
+        $dailyReports = DailyReport::latest()->get();
+
+
+        return view('daily_report.all', compact('dailyReports'));
+    }
+
     // Show the form for creating a new report
     public function create()
     {

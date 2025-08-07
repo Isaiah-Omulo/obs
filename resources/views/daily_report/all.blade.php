@@ -17,7 +17,7 @@
 @section('content')
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h4 class="mb-0">Zonal Reports</h4>
+        <h4 class="mb-0">All Reports</h4>
         <a href="{{ route('daily_reports.create') }}" class="btn btn-primary">
             <i class="fas fa-plus me-1"></i> Add New Report 
         </a>
@@ -62,9 +62,9 @@
                                 @if (in_array(auth()->user()->role, ['director', 'manager']))
                                 <td>
 
-                                <div class="d-flex flex-wrap gap-1">
+                                <div>
 
-                                    {{-- <a href="{{ route('daily_reports.edit', $report->id) }}" 
+                                    {{--<a href="{{ route('daily_reports.edit', $report->id) }}" 
                                            class="btn btn-sm btn-warning m-1" 
                                            title="Edit">
                                             <i class="fas fa-edit"></i>

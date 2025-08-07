@@ -3,6 +3,10 @@
 
 {{ $messageText }}
 
-Thanks,<br>
+@component('mail::button', ['url' => url('/occurrence')])
+View Occurrence
+@endcomponent
+
+Thanks,  
 {{ config('app.name') }}
 @endcomponent

@@ -47,7 +47,7 @@
                             <th>Report</th>
                             <th>Shift</th>
                             <th>Zone</th>
-                            <th>Reporter</th>
+                            <th>System User</th>
                             <th>Manager</th>
                             <th>Director</th>
                         </tr>
@@ -59,11 +59,14 @@
                                 <td>
 
                                 <div class="d-flex flex-wrap gap-1">
-                                        <a href="{{ route('daily_reports.edit', $report->id) }}" 
+
+                                    {{-- <a href="{{ route('daily_reports.edit', $report->id) }}" 
                                            class="btn btn-sm btn-warning m-1" 
                                            title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
+
+
 
                                        <form action="{{ route('daily_reports.destroy', $report->id) }}"
                                           method="POST"
@@ -74,7 +77,8 @@
                                         <button type="button" class="btn btn-sm btn-danger delete-btn" title="Delete">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
-                                    </form>
+                                    </form>--}}
+                                      
 
                                     <button class="btn btn-sm btn-info text-white m-1 btn-add-report-input" 
                                             data-id="{{ $report->id }}"

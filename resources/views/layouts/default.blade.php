@@ -27,6 +27,11 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 <!-- Sparkline -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sparklines/2.1.2/jquery.sparkline.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -79,5 +84,26 @@
 	@yield('outside-content')
 	
 	@include('includes.page-js')
+
+	<footer class="bg-light border-top py-4 mt-5">
+	  <div class="container text-center">
+	    <div class="d-flex justify-content-center align-items-center mb-2">
+	      <img src="{{ asset('images/icon_ku_bg.png') }}" alt="Kenyatta University Logo" style="height: 32px; margin-right: 8px;">
+	      <span class="fw-semibold text-dark">Kenyatta University</span>
+	    </div>
+	    <p class="mb-1 text-muted small">
+	      &copy; <span id="footer-year">{{ date('Y') }}</span> Kenyatta University. All rights reserved.
+	    </p>
+	    <ul class="list-inline mb-0 small">
+	      <li class="list-inline-item"><a href="https://accommodation.ku.ac.ke/" class="text-muted text-decoration-none">Accommodation</a></li>
+	      <li class="list-inline-item">|</li>
+	      <li class="list-inline-item"><a href="https://accommodation.ku.ac.ke/about-us" class="text-muted text-decoration-none">About Us</a></li>
+	      <li class="list-inline-item">|</li>
+	      <li class="list-inline-item"><a href="https://accommodation.ku.ac.ke/contact-us" class="text-muted text-decoration-none">Contact</a></li>
+	    </ul>
+	  </div>
+	</footer>
+
+
 </body>
 </html>

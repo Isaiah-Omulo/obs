@@ -12,19 +12,19 @@ class EscalationMail extends Mailable
 
     public $subjectText;
     public $messageText;
+    public $occurrenceId;
 
-    public function __construct($subjectText, $messageText)
+    public function __construct($subjectText, $messageText, $occurrenceId)
     {
         $this->subjectText = $subjectText;
         $this->messageText = $messageText;
+        $this->occurrenceId = $occurrenceId;
     }
 
     public function build()
     {
         return $this->subject($this->subjectText)
-                    ->markdown('emails.escalation')
-                    ->with([
-                        'messageText' => $this->messageText,
-                    ]);
+                    ->markdown('emails.escalation');
     }
 }
+

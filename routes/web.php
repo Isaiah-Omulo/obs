@@ -91,7 +91,9 @@ Route::prefix('occurrence')->name('occurrence.')->middleware('auth')->group(func
     Route::put('/{id}', [OccurrenceController::class, 'update'])->name('update');
 
     Route::post('/{occurrence}/input', [OccurrenceController::class, 'input'])->name('input');
+    Route::get('/{occurrence}', [OccurrenceController::class, 'show'])->name('show');
 
+    Route::post('/{occurrence}/resolve', [OccurrenceController::class, 'markAsResolved'])->name('resolve');
 
 });
 

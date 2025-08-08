@@ -92,10 +92,24 @@ class OccurrenceController extends Controller
 
            $occurrence_type = $request->occurrence_type === 'Other' ? $request->custom_nature : $request->occurrence_type;
 
+            $occurrenceType = $request->occurrence_type;
+
+           $tableName = 'occurrences';
+
+             $statement = DB::select("SHOW TABLE STATUS LIKE '{$tableName}'");
+             $nextId = $statement[0]->Auto_increment; 
+
+
+            $typePrefix = substr($occurrenceType, 0, 3); 
+
+            
+            $trackingNumber = "obs_{$nextId}_{$typePrefix}";
+
 
             DB::beginTransaction();
 
             $occurrence = Occurrence::create([
+                'tracking_number' => $trackingNumber,
                 'user_id' => auth()->id(),
                 'shift' => $request->shift,
                 'hostel' => $request->location,
@@ -317,6 +331,43 @@ class OccurrenceController extends Controller
 }
 
 
+
+   public function show(Occurrence $occurrence)
+    {
+        
+        $occurrence->load('files', 'user');
+
+        // Return the view and pass the single occurrence data to it
+        return view('occurrences.view', [
+            'occurrence' => $occurrence
+        ]);
+
+        
+    }
+    public function markAsResolved(Occurrence $occurrence)
+    {
+        // Authorization Check: Ensure the user is not a housekeeper or attendant.
+       
+
+         try {
+            $occurrence->resolved = 'yes';
+            $occurrence->save();
+
+            return response()->json([ // This should already be correct
+                'success' => true,
+                'message' => 'Occurrence has been marked as resolved.'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to resolve occurrence ' . $occurrence->id . ': ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An unexpected server error occurred.'
+            ], 500);
+        }
+    
+    }
 
 
 

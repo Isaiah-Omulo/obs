@@ -9,7 +9,7 @@
 <!-- DataTables CSS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 @endpush
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -30,7 +30,7 @@
 
                    
                     <th>Actions</th>
-                    
+                    <th>Tracking Number</th>
                     <th>User</th>
                     <th>Shift</th>
                     <th>Hostel</th>
@@ -61,6 +61,7 @@
                 @forelse($occurrences as $occurrence)
 
                     <tr id="occurrence-row-{{ $occurrence->id }}">
+
                        <td>
                             <div class="btn-group btn-group-sm" role="group" aria-label="Occurrence Actions">
 
@@ -114,7 +115,15 @@
 
                             </div>
                         </td>
-
+                       <td>
+                            {{-- This now becomes a link to the detail page --}}
+                            <a href="{{ route('occurrence.show', $occurrence->id) }}" class="text-decoration-none">
+                                <span class="badge rounded-pill bg-transparent border border-primary text-primary d-inline-flex align-items-center">
+                                    <i class="fa-solid fa-tag me-2"></i>
+                                    <span>{{ $occurrence->tracking_number }}</span>
+                                </span>
+                            </a>
+                        </td>
 
                         <td>{{ $occurrence->user->name ?? 'N/A' }}</td>
                         <td>{{ $occurrence->shift }}</td>

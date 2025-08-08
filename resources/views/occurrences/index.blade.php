@@ -47,10 +47,13 @@
 
                     <th>Files</th>
                         <th>Hostel</th>
+
+                    @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
                         <th>Zonal Officer</th>
                         <th>Administrator</th>
                         <th>Manager</th>
                         <th>Director</th>
+                    @endif
                    
                 </tr>
             </thead>
@@ -141,32 +144,43 @@
                         </td>
 
                             <td id="hostel-{{ $occurrence->id }}">{{ $occurrence->hostel_input ?? '' }}</td>
+
+                            @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
                         
                             <td id="zonal-officer-{{ $occurrence->id }}">{{ $occurrence->zonal_officer_input ?? '' }}</td>
                             <td id="administrator-{{ $occurrence->id }}">{{ $occurrence->administrator_input ?? '' }}</td>
                             <td id="manager-{{ $occurrence->id }}">{{ $occurrence->manager_input ?? '' }}</td>
                             <td id="director-{{ $occurrence->id }}">{{ $occurrence->director_input ?? '' }}</td>
+
+                            @endif
                         
 
 
                 @empty
                     <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    
                     
 
-                    <th></th>
+                    
                     @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
-                        <th></th>
-                        <th></th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                     @endif
                 </tr>
                 @endforelse

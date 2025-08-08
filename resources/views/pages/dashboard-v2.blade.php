@@ -7,6 +7,95 @@
 	<link href="/assets/plugins/datepickk/dist/datepickk.min.css" rel="stylesheet" />
 	<link href="/assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
 	<link href="/assets/plugins/nvd3/build/nv.d3.css" rel="stylesheet" />
+
+<style type="text/css">
+/*
+ * FINAL Professional Report Table CSS
+ * (Responsive, Mobile-First, with Adjusted Desktop Columns)
+ */
+
+/* 1. CORE STYLES (Mobile-First, Scrollable)
+--------------------------------------------------------------*/
+.professional-report-table {
+    min-width: 900px; 
+    width: 100%;
+    border-collapse: collapse;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #fff;
+}
+
+/* SMART BORDER HIERARCHY */
+.professional-report-table th, 
+.professional-report-table td {
+    border: 1px solid #e9ecef; /* Minor gridline */
+    padding: 0.4rem 0.5rem;
+    vertical-align: middle;
+    font-size: 0.8rem;
+    text-align: center;
+    transition: border-color 0.2s ease;
+}
+
+.professional-report-table thead { border-bottom: 2px solid #adb5bd; } /* Major gridline */
+.professional-report-table tfoot { border-top: 2px solid #adb5bd; }    /* Major gridline */
+.professional-report-table .day-divider { border-right: 2px solid #dee2e6; }
+.professional-report-table .hostel-name-col { border-right: 2px solid #ced4da; }
+.professional-report-table .available-col { border-left: 2px solid #ced4da; }
+
+/* HOVER EFFECT */
+.professional-report-table tbody tr:hover td {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
+}
+
+/* OTHER STYLING */
+.professional-report-table thead { background-color: #f8f9fa; color: #6c757d; font-weight: 600; }
+.professional-report-table thead th { font-size: 0.7rem; text-transform: uppercase; }
+.professional-report-table tfoot { font-weight: 700; background-color: #f8f9fa; }
+
+/* STICKY COLUMNS */
+.professional-report-table .hostel-name-col,
+.professional-report-table .available-col { position: sticky; z-index: 2; }
+.professional-report-table .hostel-name-col { left: 0; text-align: left !important; font-weight: 600; }
+.professional-report-table .available-col { right: 0; font-weight: 700; }
+
+/* Keep sticky column backgrounds consistent */
+.professional-report-table tbody tr:hover .hostel-name-col { background-color: #f8f9fa; }
+.professional-report-table .hostel-name-col,
+.professional-report-table tfoot .hostel-name-col,
+.professional-report-table tfoot .available-col { background-color: #f8f9fa; }
+
+.text-muted-light { color: #adb5bd !important; }
+
+
+/* 2. DESKTOP OVERRIDES (Applies only to screens 992px and wider)
+--------------------------------------------------------------*/
+@media (min-width: 992px) {
+    .professional-report-table {
+        table-layout: fixed;
+        min-width: 100%;
+    }
+
+    /* --- ADJUSTED COLUMN WIDTHS --- */
+    
+    /* Reduced the width of the first column. Long names will now wrap. */
+    .professional-report-table .hostel-name-col { 
+        width: 14%; /* <-- MODIFIED */
+        white-space: normal; /* Allows text wrapping */
+    }
+    
+    /* Increased the width of the capacity column to fit larger numbers. */
+    .professional-report-table .capacity-col { 
+        width: 7%; /* <-- MODIFIED */
+    }
+
+    /* Slightly increased the width of the 'Available' column. */
+    .professional-report-table .available-col { 
+        width: 6%; /* <-- MODIFIED */
+    }
+    
+    /* The remaining 14 Day/Night columns will automatically share the leftover 73% of width. */
+}
+</style>
 @endpush
 
 @push('scripts')
@@ -81,7 +170,7 @@
 				<div class="widget widget-stats bg-primary">
 					<div class="stats-icon stats-icon-lg"><i class="fa fa-user-friends"></i></div>
 					<div class="stats-content">
-						<div class="stats-title">HOSTEL ATTENDANTS</div>
+						<div class="stats-title">HOSTEL ATTENDANTS/HOUSE KEEPER</div>
 						<div class="stats-number">{{ $hostelAttendants }}</div>
 						<div class="stats-desc">Active reporters</div>
 					</div>
@@ -200,11 +289,218 @@
 	
 
 
-
-
-
 </div>
 
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="card shadow-sm">
+             <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
+		        {{-- The title now shows the date range --}}
+		        <h5 class="card-title mb-0 fw-bold text-secondary">
+		            Weekly Hostel Occupancy Report <span class="text-muted">({{ $weekDisplay }})</span>
+		        </h5>
+		        
+		        {{-- The new navigation controls --}}
+		        <div class="week-navigation">
+		            <a href="{{ route('dashboard-v2', ['date' => $previousWeekDate]) }}" class="btn btn-sm btn-outline-secondary">
+		                <i class="fas fa-chevron-left"></i> Prev Week
+		            </a>
+		            
+		            {{-- Only show the "Next Week" button if we are not on the current week --}}
+		            @if(!$isCurrentWeek)
+		                <a href="{{ route('dashboard-v2', ['date' => $nextWeekDate]) }}" class="btn btn-sm btn-outline-secondary">
+		                    Next Week <i class="fas fa-chevron-right"></i>
+		                </a>
+		            @endif
+		        </div>
+		    </div>
+            <div class="table-responsive">
+
+            	{{--
+					@php
+                    // MOCKUP DATA...
+                    $hostelWeeklyData = [
+                        (object)[ 'name' => 'Nyayo 2 Annex', 'capacity' => 5000, 'occupancy' => [4950, 4980, 4945, 4975, 4940, 4970, 4935, 4965, 4100, 4120, null, null, null, null], 'latest_occupancy' => 4120 ],
+                        (object)[ 'name' => 'Usambara 1', 'capacity' => 80, 'occupancy' => [75, 78, 74, 77, 72, 76, 69, 74, 68, 70, 65, 68, 64, 67], 'latest_occupancy' => 67 ],
+                        (object)[ 'name' => 'Aberdare 3 Main Block', 'capacity' => 120, 'occupancy' => [80, 85, 82, 88, 78, 84, 75, 80, 72, 78, 70, 75, 68, 72], 'latest_occupancy' => 72 ]
+                    ];
+                    $totals = [ 'capacity' => 0, 'occupancy' => array_fill(0, 14, 0), 'latest_occupancy' => 0 ];
+                @endphp
+            	--}}
+                
+
+                <table class="professional-report-table">
+    <thead>
+        <tr>
+            <th rowspan="2" class="hostel-name-col">Hostel</th>
+            <th rowspan="2" class="capacity-col">Cap.</th>
+            <th colspan="2">Mon</th><th colspan="2">Tue</th><th colspan="2">Wed</th>
+            <th colspan="2">Thu</th><th colspan="2">Fri</th><th colspan="2">Sat</th>
+            <th colspan="2">Sun</th>
+            <th rowspan="2" class="available-col">Avail.</th>
+        </tr>
+        <tr>
+            <th>N</th><th class="day-divider">D</th>
+            <th>N</th><th class="day-divider">D</th>
+            <th>N</th><th class="day-divider">D</th>
+            <th>N</th><th class="day-divider">D</th>
+            <th>N</th><th class="day-divider">D</th>
+            <th>N</th><th class="day-divider">D</th>
+            <th>N</th><th class="day-divider">D</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($hostelWeeklyData as $hostel)
+            <tr>
+                <td class="hostel-name-col">{{ $hostel->name }}</td>
+                <td class="capacity-col">{{ $hostel->capacity }}</td>
+                
+                @foreach($hostel->occupancy as $index => $count)
+                   
+                    <td class="{{ ($index % 2 != 0) ? 'day-divider' : '' }}">
+                        {!! $count !== null ? $count : '<span class="text-muted-light">—</span>' !!}
+                    </td>
+                @endforeach
+
+                <td class="available-col fw-bold">
+                  
+                    <span class="{{ $hostel->available <= ($hostel->capacity * 0.1) ? 'text-danger' : 'text-success' }}">
+                        {{ $hostel->available }}
+                    </span>
+                </td>
+            </tr>
+        @endforeach
+    </tbody>
+    <tfoot>
+        
+        <tr>
+            <td class="hostel-name-col">Total</td>
+            <!-- CHANGED: Use object syntax `->` instead of array syntax `[]` -->
+            <td class="capacity-col">{{ $totals->capacity }}</td>
+            
+            <!-- CHANGED: Use object syntax `->` for the loop -->
+            @foreach($totals->occupancy as $index => $totalCount)
+                <td class="{{ ($index % 2 != 0) ? 'day-divider' : '' }}">
+                    {!! $totalCount > 0 ? $totalCount : '<span class="text-muted-light">—</span>' !!}
+                </td>
+            @endforeach
+
+            <td class="available-col fw-bold">
+                <!-- CHANGED: Use the pre-calculated `$totals->available` and object syntax `->` -->
+                <span class="{{ $totals->available <= ($totals->capacity * 0.1) ? 'text-danger' : 'text-success' }}">
+                    {{ $totals->available }}
+                </span>
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- =================================================================== -->
+<!-- START: ZONAL WEEKLY OCCUPANCY REPORT TABLE                      -->
+<!-- This is the new component for your Zonal data.                  -->
+<!-- =================================================================== -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+             <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
+		        {{-- The title is updated for the Zonal Report --}}
+		        <h5 class="card-title mb-0 fw-bold text-secondary">
+		            Weekly Zonal Occupancy Report <span class="text-muted">({{ $weekDisplay }})</span>
+		        </h5>
+		        
+		        {{-- The navigation controls are identical and will control both tables --}}
+		        <div class="week-navigation">
+		            <a href="{{ route('dashboard-v2', ['date' => $previousWeekDate]) }}" class="btn btn-sm btn-outline-secondary">
+		                <i class="fas fa-chevron-left"></i> Prev Week
+		            </a>
+		            
+		            @if(!$isCurrentWeek)
+		                <a href="{{ route('dashboard-v2', ['date' => $nextWeekDate]) }}" class="btn btn-sm btn-outline-secondary">
+		                    Next Week <i class="fas fa-chevron-right"></i>
+		                </a>
+		            @endif
+		        </div>
+		    </div>
+            <div class="table-responsive">
+                <table class="professional-report-table">
+                    <thead>
+                        <tr>
+                            {{-- CHANGED: The main column is now "Zone" --}}
+                            <th rowspan="2" class="hostel-name-col">Zone</th>
+                            <th rowspan="2" class="capacity-col">Cap.</th>
+                            <th colspan="2">Mon</th><th colspan="2">Tue</th><th colspan="2">Wed</th>
+                            <th colspan="2">Thu</th><th colspan="2">Fri</th><th colspan="2">Sat</th>
+                            <th colspan="2">Sun</th>
+                            <th rowspan="2" class="available-col">Avail.</th>
+                        </tr>
+                        <tr>
+                            <th>N</th><th class="day-divider">D</th>
+                            <th>N</th><th class="day-divider">D</th>
+                            <th>N</th><th class="day-divider">D</th>
+                            <th>N</th><th class="day-divider">D</th>
+                            <th>N</th><th class="day-divider">D</th>
+                            <th>N</th><th class="day-divider">D</th>
+                            <th>N</th><th class="day-divider">D</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{-- CHANGED: We now loop through `$zoneWeeklyData` as `$zone` --}}
+                        @foreach($zoneWeeklyData as $zone)
+                            <tr>
+                                {{-- Use the $zone variable to display data --}}
+                                <td class="hostel-name-col">{{ $zone->name }}</td>
+                                <td class="capacity-col">{{ $zone->capacity }}</td>
+                                
+                                @foreach($zone->occupancy as $index => $count)
+                                    <td class="{{ ($index % 2 != 0) ? 'day-divider' : '' }}">
+                                        {!! $count > 0 ? $count : '<span class="text-muted-light">—</span>' !!}
+                                    </td>
+                                @endforeach
+
+                                <td class="available-col fw-bold">
+                                    <span class="{{ $zone->available <= ($zone->capacity * 0.1) ? 'text-danger' : 'text-success' }}">
+                                        {{ $zone->available }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td class="hostel-name-col">Total</td>
+                            
+                            {{-- CHANGED: Use the `$zonalTotals` variable for the footer --}}
+                            <td class="capacity-col">{{ $zonalTotals->capacity }}</td>
+                            
+                            @foreach($zonalTotals->occupancy as $index => $totalCount)
+                                <td class="{{ ($index % 2 != 0) ? 'day-divider' : '' }}">
+                                    {!! $totalCount > 0 ? $totalCount : '<span class="text-muted-light">—</span>' !!}
+                                </td>
+                            @endforeach
+
+                            <td class="available-col fw-bold">
+                                <span class="{{ $zonalTotals->available <= ($zonalTotals->capacity * 0.1) ? 'text-danger' : 'text-success' }}">
+                                    {{ $zonalTotals->available }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- FINAL COMPONENT END -->
+{{--
 <div class="row">
 
     <!-- Total Today -->
@@ -382,7 +678,7 @@
     </div>
 </div>
 
-
+--}}
 
 
 @endsection

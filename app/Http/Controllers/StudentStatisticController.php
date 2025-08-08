@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator; 
 class StudentStatisticController extends Controller
 {
        public function index(Request $request)
@@ -32,28 +33,57 @@ class StudentStatisticController extends Controller
         return view('student_statistics.create', compact('hostels', 'lastHostelId'));
     }
 
-   public function store(Request $request)
- {
-        $request->validate([
-            'hostel_id' => 'required|exists:hostels,id',
-            'record_date' => 'required|date',
-            'shift' => 'required|in:Day,Night',
-            'students_present' => 'required|integer|min:0',
-            'comments' => 'nullable|string',
-        ]);
+        public function store(Request $request)
+        {
+            // 1. GET CONTEXT: Before validating, fetch the hostel to find its capacity.
+            $hostel = Hostel::find($request->input('hostel_id'));
 
-        StudentStatistic::create([
-            'user_id' => auth()->id(),
-            'hostel_id' => $request->hostel_id,
-            'record_date' => $request->record_date,
-            'shift' => $request->shift,
-            'students_present' => $request->students_present,
-            'comments' => $request->comments,
-        ]);
+            // If a hacker submits a fake hostel_id, we must catch it here.
+            if (!$hostel) {
+                return back()
+                    ->withErrors(['hostel_id' => 'The selected hostel is invalid.'])
+                    ->withInput();
+            }
 
-        return redirect()->route('student_statistics.index')->with('success', 'Student statistics recorded successfully.');
-    }
+            // We assume the 'number_of_students' column holds the capacity.
+            $capacity = $hostel->number_of_students;
 
+            // 2. DEFINE DYNAMIC RULES: The 'max' rule now uses the capacity we found.
+            $rules = [
+                'hostel_id'        => 'required|exists:hostels,id',
+                'record_date'      => 'required|date',
+                'shift'            => 'required|in:Day,Night',
+                'students_present' => "required|integer|min:0|max:{$capacity}", // This is the dynamic rule
+                'comments'         => 'nullable|string|max:2000',
+            ];
+
+            // 3. DEFINE CUSTOM MESSAGES: This makes the error much more user-friendly.
+            $messages = [
+                'students_present.max' => "The number of students cannot exceed the hostel's capacity of {$capacity}.",
+            ];
+
+            // 4. VALIDATE: We use the Validator facade for full control.
+            $validator = Validator::make($request->all(), $rules, $messages);
+
+            // If validation fails, redirect back with the specific errors and old input.
+            if ($validator->fails()) {
+                return redirect()->back()
+                            ->withErrors($validator)
+                            ->withInput();
+            }
+
+            // 5. CREATE THE RECORD: If validation passes, get the clean data.
+            $validatedData = $validator->validated();
+            
+            // Add the authenticated user's ID to the data.
+            $validatedData['user_id'] = auth()->id();
+
+            StudentStatistic::create($validatedData);
+
+            // 6. REDIRECT WITH SUCCESS MESSAGE
+            return redirect()->route('student_statistics.index')
+                             ->with('success', 'Student statistics recorded successfully.');
+        }
 
 
     public function destroy($id)

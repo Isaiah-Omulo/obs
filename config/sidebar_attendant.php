@@ -17,5 +17,11 @@ return [
             'title'      => 'Student Statistics',
             'route-name' => 'student_statistics.index'
         ],
+
+         [
+            'icon'     => 'fa fa-people-arrows',
+            'title'    => 'Handover/Takeover',
+            'route-name' => 'takeover.create' 
+        ],
     ],
 ];

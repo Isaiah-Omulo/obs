@@ -91,7 +91,7 @@ class ZoneController extends Controller
         public function hostelStore(Request $request) 
         {
             $request->validate([
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:255|unique:hostels,name',
                 'zone_id' => 'required|exists:zones,id',
                 'number_of_students' => 'required|integer|min:1'
             ]);

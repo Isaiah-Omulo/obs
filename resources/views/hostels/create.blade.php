@@ -19,22 +19,40 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="name" class="form-label">Hostel Name</label>
-                    <input type="text" class="form-control" name="name" placeholder="Enter hostel name" required>
+                    {{-- 
+                        1. Add 'is-invalid' class if an error for 'name' exists.
+                        2. Use old('name') to repopulate the field with its previous value.
+                    --}}
+                    <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" placeholder="Enter hostel name" value="{{ old('name') }}" required>
+                    
+                    {{-- 3. Display the error message if it exists. --}}
+                    @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label for="zone_id" class="form-label">Zone</label>
-                    <select name="zone_id" class="form-control" required>
+                    <select name="zone_id" class="form-control @error('zone_id') is-invalid @enderror" required>
                         <option value="">Select a Zone</option>
                         @foreach($zones as $zone)
-                            <option value="{{ $zone->id }}">{{ $zone->name }}</option>
+                            {{-- Conditionally add 'selected' if this was the previously selected option --}}
+                            <option value="{{ $zone->id }}" {{ old('zone_id') == $zone->id ? 'selected' : '' }}>
+                                {{ $zone->name }}
+                            </option>
                         @endforeach
                     </select>
+                    @error('zone_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label for="number_of_students" class="form-label">Number of Students</label>
-                    <input type="number" name="number_of_students" class="form-control" required placeholder="Enter number of students">
+                    <label for="number_of_students" class="form-label">Number of Students (Capacity)</label>
+                    <input type="number" name="number_of_students" class="form-control @error('number_of_students') is-invalid @enderror" value="{{ old('number_of_students') }}" required placeholder="Enter hostel capacity">
+                    @error('number_of_students')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 

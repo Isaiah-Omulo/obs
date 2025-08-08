@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class StudentStatistic extends Model
 {
-        protected $fillable = [
+    protected $fillable = [
         'user_id',
         'hostel_id',
         'record_date',
@@ -14,7 +14,6 @@ class StudentStatistic extends Model
         'students_present',
         'comments',
     ];
-
 
     public function hostel()
     {
@@ -27,9 +26,8 @@ class StudentStatistic extends Model
     }
 
     // In StudentStatistic.php
-    public static function lastUsedHostelIdByUser($userId) 
+    public static function lastUsedHostelIdByUser($userId)
     {
         return self::where('user_id', $userId)->latest()->value('hostel_id');
     }
-
 }

@@ -279,21 +279,36 @@ class OccurrenceController extends Controller
         'input_text' => 'required|string',
         'role' => 'required|in:manager,director,zonal_officer,administrator,coordinator,house_keeper,hostel_attendant'
     ]);
-
+    $separator = "\n\n"; 
     if ($request->role === 'manager') {
+
+        if (!empty($occurrence->manager_input)) {
+            $occurrence->manager_input .= $separator;
+        }
+        $occurrence->manager_input .= $request->input_text;
+
         $occurrence->manager_input = $request->input_text;
     } else if ($request->role === 'director')  {
-        $occurrence->director_input = $request->input_text;
+
+        if (!empty($occurrence->director_input)) {
+            $occurrence->director_input .= $separator;
+        }
+        $occurrence->director_input .= $request->input_text;
+        
     }
     else if ($request->role === 'zonal_officer')  {
-        $occurrence->zonal_officer_input = $request->input_text . ":By ". auth()->user()->name;
+        $newInput = $request->input_text . " (By: ". auth()->user()->name . ")";
+        if (!empty($occurrence->zonal_officer_input)) {
+            $occurrence->zonal_officer_input .= $separator;
+        }
+        $occurrence->zonal_officer_input .= $newInput;
     }
     else if ($request->role === 'administrator' || $request->role === 'coordinator' )  {
-        $occurrence->administrator_input = $request->input_text . ":By ". auth()->user()->name;
+        $occurrence->administrator_input .= $request->input_text . ":By ". auth()->user()->name;
     }
 
     else if ($request->role === 'house_keeper' || $request->role === 'hostel_attendant' )  {
-        $occurrence->hostel_input = $request->input_text . ":By ". auth()->user()->name;
+        $occurrence->hostel_input .= $request->input_text . ":By ". auth()->user()->name;
     }
 
     $occurrence->save();

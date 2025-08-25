@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserRegisteredMail;
 
 class UserController extends Controller
 {
@@ -106,9 +109,15 @@ class UserController extends Controller
         }
 
         try {
-            User::create($data);
+            $user = User::create($data);
+
+        // Send registration email
+            Mail::to($user->email)->send(new UserRegisteredMail($user));
+            // Log email sending
+            Log::info("Registration email sent to user: {$user->email}, ID: {$user->id}");
             return redirect()->route('user.create')->with('success', 'User created successfully!');
         } catch (\Exception $e) {
+            Log::error("Failed to create user or send email: " . $e->getMessage());
             return redirect()->back()->withErrors(['error' => 'Something went wrong. Please try again.']);
         }
     }

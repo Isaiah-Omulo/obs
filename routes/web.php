@@ -18,20 +18,19 @@ use App\Http\Controllers\HandoverTakeoverController;
 Route::get('/', function () {
     Log::info("Home page: ");
     if (!Auth::check()) {
-        return redirect('/login/v2');
+        
+    return redirect()->route('login-v2');
     }
     
     Log::info("The user role is: ".Auth::user()->role);
     // Check user role and redirect accordingly
-    if (Auth::user()->role === 'Lawyer') {
-        return redirect('/dashboard/lawyer');
-    }
+    
 
 
 
-
-    return redirect('/dashboard/v2'); // Default for other roles
+    return redirect()->route('dashboard-v2'); // Default for other roles
 });
+
 
 Route::get('/dashboard/v2', [MainController::class, 'dashboardV2'])
     ->name('dashboard-v2')
@@ -104,6 +103,7 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/create', [UserController::class, 'create'])->name('user.create');
     Route::post('/store', [UserController::class, 'store'])->name('user.store');
     Route::get('/users/{id}/delete', [UserController::class, 'destroy'])->name('user.destroy');
+    Route::put('/{id}/update', [UserController::class, 'updateWithId'])->name('user.updateWithId');
 
 });
 

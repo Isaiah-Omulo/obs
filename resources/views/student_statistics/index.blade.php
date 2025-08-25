@@ -11,7 +11,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <h4 class="mb-0">Student Attendance Statistics</h4>
         <a href="{{ route('student_statistics.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i> Add New Record
+            <i class="fas fa-plus me-1"></i> Add New Record 
         </a>
     </div>
 
@@ -66,7 +66,16 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center text-muted">No statistics recorded yet.</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
+                                <td></td>
+                                @endif
                             </tr>
                         @endforelse
                     </tbody>

@@ -139,13 +139,18 @@
                         <td>
                             @if($occurrence->files && $occurrence->files->count())
                                 <ul class="list-unstyled">
-                                    @foreach($occurrence->files as $file)
-                                        <li>
-                                            <a href="{{ asset('storage/occurrence_files/' . $file->original_name) }}" target="_blank">
-                                                📄 {{ \Illuminate\Support\Str::limit($file->original_name, 20) }}
-                                            </a>
-                                        </li>
-                                    @endforeach
+                                @foreach($occurrence->files as $file)
+                                    @php 
+                                    $filePath = public_path('uploads/occurrence_files/' . $file->original_name); 
+                                    @endphp
+
+                                    @if(file_exists($filePath))
+                                        <a href="{{ asset('uploads/occurrence_files/' . $file->original_name) }}" target="_blank">
+                                            {{ $file->original_name }}
+                                        </a><br>
+                                    @endif
+                                @endforeach
+
                                 </ul>
                             @else
                                 <span class="text-muted">None</span>

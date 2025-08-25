@@ -125,21 +125,23 @@ class OccurrenceController extends Controller
 
             Log::info('Occurrence created:', ['id' => $occurrence->id]);
             if ($request->hasFile('attachment')) {
-                foreach ($request->file('attachment') as $file) {
-                    $fileName = time() . '_' . uniqid() . '_' . $file->getClientOriginalName(); // Unique filename
-                    $file->storeAs('occurrence_files', $fileName, 'public');
+            $uploadPath = public_path('uploads/occurrence_files');
 
-                    $occurrence->files()->create([
-                        'occurrence_id' =>  $occurrence->id,
-                        'original_name' => $fileName // Store only the filename
-                    ]);
+            foreach ($request->file('attachment') as $file) {
+                // Unique filename
+                $fileName = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
 
-                    Log::info('Attachment stored for occurrence', [
-                        'occurrence_id' => $occurrence->id,
-                        'file_name' => $fileName
-                    ]);
-                }
+                // Move to public folder
+                $file->move($uploadPath, $fileName);
+
+                // Store filename in DB
+                $occurrence->files()->create([
+                    'occurrence_id' => $occurrence->id,
+                    'original_name' => $fileName
+                ]);
             }
+        }
+
 
 
             DB::commit();

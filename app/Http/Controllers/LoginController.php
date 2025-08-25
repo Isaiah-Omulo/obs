@@ -27,7 +27,7 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login/v2'); // Redirect to login page after logout
+        return redirect()->route('login-v2'); // Redirect to login page after logout
     }
 
     public function showLoginForm(){
@@ -45,7 +45,7 @@ class LoginController extends Controller
         // Attempt to log in
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate(); // Prevent session fixation
-            return redirect()->intended('/dashboard/v2'); // Or any dashboard page
+            return redirect()->intended(url('dashboard/v2')); // Or any dashboard page
         }
 
         // If login fails
@@ -106,7 +106,7 @@ class LoginController extends Controller
 
                 if (!$user) {
                     // If user doesn't exist, deny access
-                    return redirect('/login')->withErrors([
+                    return redirect()->route('login-v2')->withErrors([
                         'google_login' => 'Access denied. Your email is not registered in the system. Please contact the Director or Manager to be registered.',
                     ]);
                 }
@@ -121,10 +121,10 @@ class LoginController extends Controller
                 // Log the user in
                 Auth::login($user);
 
-                return redirect()->intended('/dashboard/v2');
+                return redirect()->intended(url('dashboard/v2'));
             } catch (\Exception $e) {
                 Log::error($e->getMessage());
-                return redirect('/login')->withErrors([
+                return redirect()->route('login')->withErrors([
                     'google_login' => 'Google login failed: ' . $e->getMessage(),
                 ]);
             }

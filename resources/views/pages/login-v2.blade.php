@@ -191,6 +191,9 @@
                     <div class="text-center text-muted small">
                         You will be redirected to the Google login page.
                     </div>
+
+
+                    
                 </div>
                 <!-- END login-content -->
 

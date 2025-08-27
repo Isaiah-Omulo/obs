@@ -89,57 +89,58 @@ class ResolutionController extends Controller
 }
 
 
-public function reUploadFiles(Request $request, Occurrence $occurrence)
-{
-    Log::info('Re-upload request received', [
-        'occurrence_route_param' => $occurrence->id,
-        'all_request_data'       => $request->all(),
-        'uploaded_files'         => $request->file('attachment') ? collect($request->file('attachment'))->map->getClientOriginalName() : [],
-        'user_id'                => auth()->id(),
-    ]);
-    try {
-        $request->validate([
-            'occurrence_id' => 'required|exists:occurrences,id',
-            'resolution_id' => 'required|exists:resolutions,id',
-            'attachment.*'  => 'file|max:5120' // each file max 5MB
+    public function reUploadFiles(Request $request, Occurrence $occurrence)
+    {
+        Log::info('Re-upload request received', [
+            'occurrence_id' => $occurrence->id,
+            'all_request_data' => $request->all(),
+            'uploaded_files' => $request->file('attachment') 
+                ? collect($request->file('attachment'))->map->getClientOriginalName() 
+                : [],
+            'user_id' => auth()->id(),
         ]);
 
-        $resolution = Resolution::findOrFail($request->resolution_id);
+        try {
+            $request->validate([
+                'attachment.*' => 'required|file|max:5120', // each file max 5MB
+            ]);
 
-        if ($request->hasFile('attachment')) {
-            $uploadPath = public_path('uploads/occurrence_files');
+            // Get the first resolution of this occurrence
+            $resolution = $occurrence->resolutions()->first();
 
-            foreach ($request->file('attachment') as $file) {
-                $fileName = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
-                $file->move($uploadPath, $fileName);
-
-                $resolution->files()->create([
-                    'resolution_id' => $resolution->id,
-                    'original_name' => $fileName,
-                    'uploaded_by'   => auth()->id(),
-                    'path'          => 'uploads/occurrence_files/' . $fileName,
-                ]);
-
-                Log::info("File uploaded for resolution ID {$resolution->id}", [
-                    'file'    => $fileName,
-                    'user_id' => auth()->id(),
-                ]);
+            if (!$resolution) {
+                return redirect()->back()->with('error', 'No resolution exists for this occurrence.');
             }
+
+            if ($request->hasFile('attachment')) {
+                $uploadPath = public_path('uploads/occurrence_files');
+
+                foreach ($request->file('attachment') as $file) {
+                    $fileName = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+                    $file->move($uploadPath, $fileName);
+
+                    $resolution->files()->create([
+                        'resolution_id' => $resolution->id,
+                        'original_name' => $fileName,
+                        'uploaded_by'   => auth()->id(),
+                        'path'          => 'uploads/occurrence_files/' . $fileName,
+                    ]);
+
+                    Log::info("File uploaded for resolution ID {$resolution->id}", [
+                        'file'    => $fileName,
+                        'user_id' => auth()->id(),
+                    ]);
+                }
+            }
+
+            return redirect()->back()->with('success', 'Files uploaded successfully');
+
+        } catch (\Exception $e) {
+            Log::error("Upload failed: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Upload failed: ' . $e->getMessage());
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Files uploaded successfully',
-        ]);
-
-    } catch (\Exception $e) {
-        Log::error("Upload failed: " . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Upload failed: ' . $e->getMessage(),
-        ], 500);
     }
-}
+
 
 
 }

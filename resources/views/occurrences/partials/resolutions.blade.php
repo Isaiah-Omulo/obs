@@ -1,30 +1,46 @@
 <div class="card shadow-sm mt-3 border-0 rounded-4">
     <div class="card-header bg-success text-white rounded-top-4 d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Resolutions</h5>
+
         @if($occurrence->resolved !== 'yes')
             <a href="{{ route('occurrence.resolution.create', $occurrence->id) }}" 
                class="btn btn-info"
                title="Mark this occurrence as resolved">
                 <i class="fas fa-check-circle me-1"></i> Mark as Resolved
             </a>
-
         @else
             <button
-                  class="btn btn-light btn-m text-primary border border-primary fw-semibold"
-                  data-bs-toggle="modal"
-                  data-bs-target="#uploadFilesResolutionModal"
-                  data-occurrence-id="{{ $occurrence->id }}"
-                  data-resolution-id="{{ $occurrence->resolutions->first()->id ?? '' }}"
-                >
-                  <i class="fas fa-plus me-1"></i> Add File: 
+                class="btn btn-light btn-m text-primary border border-primary fw-semibold"
+                id="addFileBtn"              
+            >
+                <i class="fas fa-plus me-1"></i> Add File
             </button>
 
-        
 
+            
         @endif
     </div>
 
     <div class="card-body">
+
+
+        <!-- Dynamic file form -->
+        <div id="fileFormContainer" style="display: none;">
+            <form action="{{ route('occurrence.resolution.upload-files', $occurrence->id) }}" 
+                  method="POST" 
+                  enctype="multipart/form-data" 
+                  id="fileUploadForm">
+                @csrf
+                <div class="mb-3">
+                    <label for="file" class="form-label">Select File</label>
+                    <input type="file" class="form-control" name="attachment[]" id="file" required>
+                </div>
+                
+                <button type="submit" class="btn btn-success">Upload</button>
+                <button type="button" id="cancelFileBtn" class="btn btn-secondary">Cancel</button>
+            </form>
+        </div>
+
         @if($occurrence->resolutions->count())
             @foreach($occurrence->resolutions as $resolution)
                 <div class="mb-4 p-3 border rounded-3 shadow-sm">
@@ -60,9 +76,10 @@
                         <div class="row">
                             <div class="col-12 col-md-3 fw-semibold text-muted">Attachments:</div>
                             <div class="col-12 col-md-9">
-                               
                                 @foreach($resolution->files as $file)
-                                    <a href="{{ asset('uploads/occurrence_files/' . $file->original_name) }}" target="_blank" class="d-block mb-1 text-decoration-none">
+                                    <a href="{{ asset('uploads/occurrence_files/' . $file->original_name) }}" 
+                                       target="_blank" 
+                                       class="d-block mb-1 text-decoration-none">
                                         <i class="fas fa-file-alt me-1 text-primary"></i>{{ $file->original_name }}
                                     </a>
                                 @endforeach
@@ -77,40 +94,8 @@
     </div>
 </div>
 
-<!-- Upload Files Modal -->
-<div class="modal fade" id="uploadFilesResolutionModal" tabindex="-1" aria-labelledby="uploadFilesModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="uploadFilesResolutionForm" enctype="multipart/form-data">
-            @csrf
 
 
-
-
-              <input type="hidden" name="occurrence_id" id="occurrence_id">
-              <input type="hidden" name="resolution_id" id="resolution_id">
-            <div class="modal-content border-0 rounded-4 shadow">
-                <div class="modal-header bg-primary text-white rounded-top-4">
-                    <h5 class="modal-title" id="uploadFilesModalLabel"><i class="fas fa-upload me-2"></i>Upload Files</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="attachment" class="form-label fw-semibold">Select files</label>
-                        <input type="file" class="form-control" id="attachment" name="attachment[]" multiple>
-
-                        <small class="text-muted">Max file size: 5MB each</small>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="submit" class="btn btn-success fw-semibold">
-                        <i class="fas fa-check me-1"></i> Upload
-                    </button>
-                    <button type="button" class="btn btn-secondary fw-semibold" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
 {{-- Optional: Smart hover effect for "Mark as Resolved" --}}
 @push('styles')
 <style>

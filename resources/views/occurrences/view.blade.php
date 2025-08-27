@@ -579,42 +579,35 @@ $(document).ready(function () {
 
 
 </script>
-
+{{--
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById('uploadFilesResolutionForm');
   const modalEl = document.getElementById('uploadFilesResolutionModal');
 
-  // When modal opens, pull IDs off the button and drop them into hidden inputs
-  modalEl.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget; // the button that triggered the modal
-    const occurrenceId = button?.getAttribute('data-occurrence-id') || '';
-    const resolutionId = button?.getAttribute('data-resolution-id') || '';
+  if (modalEl) {
+    modalEl.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      if (!button) return;
 
-    document.getElementById('occurrence_id').value = occurrenceId;
-    document.getElementById('resolution_id').value = resolutionId;
-
-
-
-
-  });
-
-  // Build route template once (Laravel route with placeholder)
-  const uploadRouteTemplate = "{{ route('occurrence.resolution.upload-files', ':id') }}";
+      modalEl.querySelector('#occurrence_id').value = button.getAttribute('data-occurrence-id') || '';
+      modalEl.querySelector('#resolution_id').value = button.getAttribute('data-resolution-id') || '';
+    });
+  }
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
     const files = document.getElementById('attachment').files;
     if (!files.length) {
-      Swal.fire({ icon: 'warning', title: 'No files selected', text: 'Please choose at least one file to upload.' });
+      Swal.fire({ icon: 'warning', title: 'No files selected', text: 'Please choose at least one file.' });
       return;
     }
 
-    const maxFileSize = 5 * 1024 * 1024; // 5MB
-    for (let i = 0; i < files.length; i++) {
-      if (files[i].size > maxFileSize) {
-        Swal.fire({ icon: 'error', title: 'File too large', text: `${files[i].name} exceeds 5MB size limit.` });
+    const maxFileSize = 5 * 1024 * 1024;
+    for (let f of files) {
+      if (f.size > maxFileSize) {
+        Swal.fire({ icon: 'error', title: 'File too large', text: `${f.name} exceeds 5MB.` });
         return;
       }
     }
@@ -622,14 +615,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const occurrenceId = document.getElementById('occurrence_id').value;
     const resolutionId = document.getElementById('resolution_id').value;
 
-    
-
     const formData = new FormData(form);
-    // ensure resolution_id is present even if JS runs before hidden inputs are set
     if (!formData.has('resolution_id')) formData.append('resolution_id', resolutionId);
     if (!formData.has('occurrence_id')) formData.append('occurrence_id', occurrenceId);
 
-    const uploadUrl = uploadRouteTemplate.replace(':id', occurrenceId);
+    const uploadUrl = "{{ route('occurrence.resolution.upload-files', ':id') }}".replace(':id', occurrenceId);
 
     fetch(uploadUrl, {
       method: 'POST',
@@ -641,27 +631,100 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl); // ✅ correct modal id
-        modalInstance.hide();
+        bootstrap.Modal.getOrCreateInstance(modalEl).hide();
         form.reset();
-
         Swal.fire({
           icon: 'success',
-          title: 'Files uploaded',
-          text: 'Your files have been uploaded successfully.',
+          title: 'Uploaded',
+          text: 'Files uploaded successfully.',
           timer: 1500,
           showConfirmButton: false
         }).then(() => location.reload());
       } else {
-        Swal.fire({ icon: 'error', title: 'Upload failed', text: data.message || 'An error occurred while uploading files.' });
+        Swal.fire({ icon: 'error', title: 'Upload failed', text: data.message || 'Error uploading files.' });
       }
     })
     .catch(err => {
       console.error(err);
-      Swal.fire({ icon: 'error', title: 'Error', text: 'An error occurred while uploading files.' });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'An unexpected error occurred.' });
     });
   });
 });
+
 </script>
+--}}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById('uploadFilesResolutionForm');
+    const modalEl = document.getElementById('uploadFilesResolutionModal');
+
+    
+    const uploadRouteTemplate = "{{ route('occurrence.resolution.upload-files', ':id') }}";
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const files = document.getElementById('attachmentResolution').files;
+        if (!files.length) {
+            Swal.fire({ icon: 'warning', title: 'No files selected', text: 'Please choose at least one file to upload.' });
+            return;
+        }
+
+        const maxFileSize = 5 * 1024 * 1024;
+        for (let f of files) {
+            if (f.size > maxFileSize) {
+                Swal.fire({ icon: 'error', title: 'File too large', text: `${f.name} exceeds 5MB size limit.` });
+                return;
+            }
+        }
+
+        const occurrenceId = document.getElementById('occurrence_id').value;
+        const formData = new FormData(form);
+        const uploadUrl = uploadRouteTemplate.replace(':id', occurrenceId);
+
+        fetch(uploadUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                form.reset();
+                Swal.fire({ icon: 'success', title: 'Files uploaded', text: 'Your files have been uploaded successfully.', timer: 1500, showConfirmButton: false })
+                .then(() => location.reload());
+            } else {
+                Swal.fire({ icon: 'error', title: 'Upload failed', text: data.message || 'An error occurred while uploading files.' });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'An unexpected error occurred while uploading files.' });
+        });
+    });
+});
+</script>
+
+
+<script>
+    const addFileBtn = document.getElementById('addFileBtn');
+    const fileFormContainer = document.getElementById('fileFormContainer');
+    const cancelFileBtn = document.getElementById('cancelFileBtn');
+
+    addFileBtn.addEventListener('click', () => {
+        fileFormContainer.style.display = 'block';
+        addFileBtn.style.display = 'none';
+    });
+
+    cancelFileBtn.addEventListener('click', () => {
+        fileFormContainer.style.display = 'none';
+        addFileBtn.style.display = 'inline-block';
+    });
+</script>
+
 
 @endpush

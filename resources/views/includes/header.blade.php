@@ -23,128 +23,179 @@ if (Auth::check()) {
 
 <style>
 
-.line {
-  height: 2px;
-  width: 120px;
-  background-color: #6c757d; /* Bootstrap secondary */
-  border-radius: 5px;
-  transition: width 0.4s ease-in-out;
+/* Header styling */
+.app-header {
+    background-color: #f8f5f5;
+    padding: 0.5rem 0;
 }
 
-.title-animate:hover .line {
-  width: 150px; /* Optional: slight animation on hover */
+.navbar-brand img {
+    max-height: 36px;
 }
 
-.title-animate {
-  animation: fadeIn 1s ease-in-out;
+/* Center title responsive */
+.app-header h1 {
+    font-size: 1rem; /* smaller on mobile */
+    text-align: center;
+    line-height: 1.2;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Hide center title on mobile */
+/* Mobile compact title */
+@media (max-width: 767px) {
+    .sticky-header h1 {
+        font-size: 1rem; /* smaller font for mobile */
+        line-height: 1.2rem;
+        margin: 0;
+    }
 }
+
+
+/* Mobile hamburger button */
+.btn[data-toggle="app-sidebar-mobile"] {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+/* User dropdown adjustments */
+.navbar-user .navbar-link {
+    font-size: 0.9rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Sticky header */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 1030; /* above content */
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+/* Shadow when scrolling */
+.sticky-header.scrolled {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    background-color: #f8f5f5; /* optional slightly darker */
+}
+
+/* Mobile tweaks */
+@media (max-width: 767px) {
+    .sticky-header .navbar-brand span {
+        display: none;
+    }
+}
+
+/* Desktop / tablet */
+.app-title-desktop h1 {
+    font-size: 1.0rem; /* bigger than fs-6 */
+    line-height: 1.2;
+}
+
+/* Mobile */
+.app-title-mobile h1 {
+    font-size: 0.8rem; /* slightly smaller for mobile */
+    line-height: 1.2;
+}
+
+/* Optional: make it scale nicely for really large screens */
+@media (min-width: 1400px) {
+    .app-title-desktop h1 {
+        font-size: 2rem;
+    }
+}
+
 
  </style>   
 @endpush
 
 
+<header id="header" class="app-header shadow-sm sticky-header" {{ $appHeaderAttr }}>
+    <div class="container-fluid d-flex align-items-center justify-content-between px-3 py-2">
+        <!-- LEFT: Brand + Mobile Toggle -->
+        <div class="d-flex align-items-center gap-2">
+            @if (!$appSidebarHide)
+                <button class="btn btn-sm d-md-none" type="button" data-toggle="app-sidebar-mobile">
+                    <i class="fa fa-bars"></i>
+                </button>
+            @endif
 
-<!-- BEGIN #header -->
-<header id="header" class="app-header py-2 px-3 shadow-sm" {{ $appHeaderAttr }} style="background-color: #f8f5f5;">
-    <div class="container-fluid">
-        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
-            
-            <!-- Navbar Brand and Mobile Togglers -->
-            <div class="d-flex align-items-center">
-                @if ($appSidebarTwo)
-                    <button class="btn btn-sm d-md-none" type="button" data-toggle="app-sidebar-end-mobile">
-                        <i class="fa fa-bars"></i>
-                    </button>
-                @endif
+            <a href="/" class="navbar-brand d-flex align-items-center gap-2 fw-bold text-dark">
+                <img src="{{ asset('images/icon_ku.png') }}" alt="University Logo" height="36" />
+                <span class="d-none d-md-inline"><strong>Kenyatta University</strong></span>
+            </a>
+        </div>
 
-                <a href="/" class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-5 text-dark">
-                    <img src="{{ asset('images/icon_ku.png') }}" alt="University Logo" height="36" />
-                    <span><strong>Kenyatta University</strong></span>
+        <!-- CENTER: Title -->
+       
+        <!-- DESKTOP / TABLET TITLE -->
+        <div class="d-none d-md-block text-center flex-grow-1 app-title-desktop">
+            <h1 class="fw-semibold text-primary-emphasis mb-0">
+                Accommodation Services: 
+                <span class="text-secondary fw-bold">Occurrence Booking System</span>
+            </h1>
+        </div>
+
+        <!-- MOBILE TITLE -->
+        <div class="d-block d-md-none text-center flex-grow-1 app-title-mobile">
+            <h1 class="fw-semibold text-primary-emphasis mb-0">
+                Occurrence Booking System
+            </h1>
+        </div>
+
+        <!-- RIGHT: User & Optional Icons -->
+        <div class="d-flex align-items-center gap-2">
+            @isset($appHeaderLanguageBar)
+                @include('includes.component.header-language-bar')
+            @endisset
+
+            <!-- User Dropdown -->
+            <div class="navbar-item navbar-user dropdown">
+                <a href="#" class="navbar-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
+                    <span class="d-none d-md-inline">{{ $full_name }}</span>
+                    <b class="caret ms-1"></b>
                 </a>
-
-                @if ($appHeaderMegaMenu && !$appSidebarTwo)
-                    <button class="btn btn-sm d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#top-navbar">
-                        <i class="fa fa-cog"></i>
-                    </button>
-                @endif
-
-                @if (($appTopMenu && !$appSidebarHide) || ($appTopMenu && $appSidebarHide && !$appSidebarTwo))
-                    <button class="btn btn-sm d-md-none" type="button" data-toggle="app-top-menu-mobile">
-                        <i class="fa fa-cog"></i>
-                    </button>
-                @endif
-
-                @if (!$appSidebarHide)
-                    <button class="btn btn-sm d-md-none" type="button" data-toggle="app-sidebar-mobile">
-                        <i class="fa fa-bars"></i>
-                    </button>
-                @endif
-            </div>
-
-            <!-- Center Title -->
-            <!-- Add class to trigger animation -->
-          <div class="text-center py-4 animate__animated animate__fadeInDown">
-              <h1 class="fw-semibold fs-4 text-primary-emphasis mb-0">
-                Accommodation Services: <span class="text-secondary fw-bold">Occurrence Booking System</span>
-              </h1>
-            </div>
-
-
-
-
-
-
-          
-
-            <!-- Right-side Navbar Items 
-            <div class="d-flex align-items-center gap-3">
-               
-                <div class="dropdown">
-                   <a href="#" id="notificationDropdownToggle" data-bs-toggle="dropdown" class="btn btn-info position-relative">
-
-                        <i class="fa fa-bell"></i>
-                        <span id="notification-count-total" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">7</span>
-                    </a>
-                    @include('includes.component.header-dropdown-notification')
-
-                </div>
-                -->
-
-                <!-- Language Bar -->
-                @isset($appHeaderLanguageBar)
-                    @include('includes.component.header-language-bar')
-                @endisset
-
-                <!-- User Dropdown -->
-                <div class="navbar-item navbar-user dropdown">
-                    <a href="#" class="navbar-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
-                       
-                        <span>
-                            <span class="d-none d-md-inline">{{ $full_name }}</span>
-                            <b class="caret"></b>
-                        </span>
-                    </a>
-                    @include('includes.component.header-dropdown-profile')
-                </div>
-
-                <!-- App Sidebar End -->
-                @if ($appSidebarTwo)
-                    <a href="javascript:;" data-toggle="app-sidebar-end" class="btn btn-light d-none d-md-inline-block">
-                        <i class="fa fa-th"></i>
-                    </a>
-                @endif
+                @include('includes.component.header-dropdown-profile')
             </div>
         </div>
     </div>
 </header>
-<!-- END #header -->
+
+
 
 
 @push('scripts')
+
+
+
+<!-- 
+<script>
+document.addEventListener("click", function(e) {
+  if (e.target.closest("[data-toggle='app-sidebar-mobile']")) {
+    console.log("Toggle button clicked!");
+      document.body.classList.toggle("app-sidebar-mobile-toggled");
+
+
+       const sidebar = document.getElementById("sidebar");
+    const backdrop = document.getElementById("sidebar-backdrop");
+    sidebar.classList.toggle("active");
+    backdrop.classList.toggle("active");
+  }
+});
+</script>
+-->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const header = document.getElementById('header');
+
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 5) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
+});
+</script>
 
 @endpush

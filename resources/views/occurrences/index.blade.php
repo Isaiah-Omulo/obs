@@ -138,24 +138,26 @@
                         <td>{{ $occurrence->resolved  }}</td>
                         <td>
                             @if($occurrence->files && $occurrence->files->count())
-                                <ul class="list-unstyled">
-                                @foreach($occurrence->files as $file)
-                                    @php 
-                                    $filePath = public_path('uploads/occurrence_files/' . $file->original_name); 
-                                    @endphp
+                                @php $firstFile = $occurrence->files->first(); @endphp
+                                @php $remainingCount = $occurrence->files->count() - 1; @endphp
 
-                                    @if(file_exists($filePath))
-                                        <a href="{{ asset('uploads/occurrence_files/' . $file->original_name) }}" target="_blank">
-                                            {{ $file->original_name }}
-                                        </a><br>
+                                @php 
+                                    $filePath = public_path('uploads/occurrence_files/' . $firstFile->original_name); 
+                                @endphp
+
+                                @if(file_exists($filePath))
+                                    <a href="{{ asset('uploads/occurrence_files/' . $firstFile->original_name) }}" target="_blank">
+                                        {{ $firstFile->original_name }}
+                                    </a>
+                                    @if($remainingCount > 0)
+                                        <span class="text-muted"> +{{ $remainingCount }} more</span>
                                     @endif
-                                @endforeach
-
-                                </ul>
+                                @endif
                             @else
                                 <span class="text-muted">None</span>
                             @endif
                         </td>
+
 
                             <td id="hostel-{{ $occurrence->id }}">{{ $occurrence->hostel_input ?? '' }}</td>
 

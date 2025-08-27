@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class File extends Model
 {
     protected $fillable = [
-        'occurrence_id', 'path', 'original_name'
+        'occurrence_id', 'path', 'original_name','uploaded_by'
     ];
 
     public function occurrence()

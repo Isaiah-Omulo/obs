@@ -1,192 +1,283 @@
-@extends('layouts.default') {{-- Or your main layout file, e.g., layouts.app --}}
+@extends('layouts.default')
 
 @section('title', 'Occurrence Details: ' . $occurrence->tracking_number)
 
 @section('content')
 
 @push('styles')
-    {{-- We only need Font Awesome and Bootstrap, no DataTables for this view --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+<style>
+    
+  
+
+@media (max-width: 767px) {
+  .prev-button, .next-button {
+    display: none !important;
+  }
+}
+
+.tab-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* smooth scroll for iOS */
+}
+.nav-tabs .nav-item {
+    flex: 0 0 auto; /* prevent wrapping on small screens */
+}
+
+@media (max-width: 767px) {
+  .prev-button, .next-button {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+    .tab-pane dl.row dt,
+    .tab-pane dl.row dd {
+        display: block;
+        width: 100%;
+    }
+    .tab-pane dl.row dt {
+        font-weight: 600;
+    }
+}
+
+
+.card-body .badge {
+    font-size: 0.75rem;
+    padding: 0.25em 0.5em;
+}
+
+.card {
+    border-radius: 0.75rem;
+    transition: transform 0.15s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.reply-btn {
+    border-radius: 50%;
+    padding: 0.35rem 0.45rem;
+}
+
+textarea#input_text {
+    resize: vertical;
+}
+
+
+
+</style>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
+<style>
+/* Ensure text truncation for table cells */
+.table td .text-truncate {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
 @endpush
 
 <div class="container mt-5">
-    
-    {{-- 1. Page Header --}}
+
+    {{-- Page Header --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Occurrence Details</h2>
+        <h2>Occurrence Details</h2>
         <a href="{{ route('occurrence.index') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-2"></i>Back to List
         </a>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
-    {{-- 2. Main Details Card --}}
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center">
-            <h5 class="mb-0">
-                <span class="badge fs-6 bg-transparent border border-primary text-primary d-inline-flex align-items-center">
-                    <i class="fa-solid fa-tag me-2"></i>
-                    <span>{{ $occurrence->tracking_number }}</span>
-                </span>
-            </h5>
-
-            @if($occurrence->resolved !== 'yes')
-                <button class="btn btn-outline-success" 
-                        id="markResolvedBtn"
-                        data-resolve-url="{{ route('occurrence.resolve', $occurrence->id) }}"
-                        title="Mark this occurrence as resolved">
-                    <i class="fas fa-check-circle me-1"></i> Mark as Resolved
-                </button>
-            @endif
+    {{-- Tabs Panel --}}
+    <div class="panel panel-inverse panel-with-tabs">
+        <div class="panel-heading p-0">
+        <div class="tab-overflow d-flex align-items-center">
             
-            {{-- Action Buttons --}}
-            <div class="btn-group btn-group-sm mt-2 mt-md-0" role="group" aria-label="Occurrence Actions">
-                <button class="btn btn-outline-info" 
-                        id="addInputBtn"
-                        title="Add your Input"
-                        data-bs-toggle="modal"
-                        data-bs-target="#inputModal">
-                    <i class="fas fa-comment-medical me-1"></i> Input
-                </button>
-                <a href="{{ route('escalate.create', ['id' => $occurrence->id]) }}" class="btn btn-outline-warning" title="Escalate this Occurrence">
-                    <i class="fas fa-exclamation-triangle me-1"></i> Escalate
-                </a>
-                {{-- Add Edit/Delete buttons if needed, restricted by role --}}
-            </div>
-        </div>
-        <div class="card-body">
-            <div class="row g-4">
-                {{-- Left Column: Core Details --}}
-                <div class="col-md-6">
-                    <dl class="row">
-                        <dt class="col-sm-4">Reported By</dt>
-                        <dd class="col-sm-8">{{ $occurrence->user->name ?? 'N/A' }}</dd>
-
-                        <dt class="col-sm-4">Shift</dt>
-                        <dd class="col-sm-8">{{ $occurrence->shift }}</dd>
-
-                        <dt class="col-sm-4">Hostel</dt>
-                        <dd class="col-sm-8">{{ $occurrence->hostel }}</dd>
-                        
-                        <dt class="col-sm-4">Date</dt>
-                        <dd class="col-sm-8">{{ \Carbon\Carbon::parse($occurrence->date)->format('F j, Y') }}</dd>
-
-                        <dt class="col-sm-4">Time of Occurrence</dt>
-                        <dd class="col-sm-8">{{ \Carbon\Carbon::parse($occurrence->time_of_occurrence)->format('g:i A') }}</dd>
-
-                        <dt class="col-sm-4">Time of Reporting</dt>
-                        <dd class="col-sm-8">{{ \Carbon\Carbon::parse($occurrence->time_of_reporting)->format('g:i A') }}</dd>
-                    </dl>
-                </div>
-                {{-- Right Column: Occurrence Specifics --}}
-                <div class="col-md-6">
-                    <dl class="row">
-                        <dt class="col-sm-4">Occurrence Type</dt>
-                        <dd class="col-sm-8">{{ $occurrence->occurrence_type }}</dd>
-
-                        <dt class="col-sm-4">Resolved</dt>
-                       <dd class="col-sm-8">
-                        <span id="resolvedStatusContainer" class="badge {{ $occurrence->resolved === 'Yes' ? 'bg-success' : 'bg-danger' }}">
-                            {{ $occurrence->resolved }}
-                        </span>
-                    </dd>
-
-                    </dl>
-                </div>
-
-                {{-- Full Width Details --}}
-                <div class="col-12">
-                    <hr>
-                    <h6>Nature of Occurrence</h6>
-                    <p class="text-muted">{{ $occurrence->nature }}</p>
-
-                    <h6>Action Taken</h6>
-                    <p class="text-muted">{{ $occurrence->action_taken }}</p>
-
-                    <h6>Resolution</h6>
-                    <p class="text-muted">{{ $occurrence->resolution ?? 'No resolution provided yet.' }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- 3. Stakeholder Inputs & Files --}}
-    <div class="row g-4">
-        {{-- Inputs Column --}}
-        <div class="col-lg-7">
-            <div class="card shadow-sm">
-                <div class="card-header"><i class="fas fa-comments me-2"></i>Stakeholder Inputs</div>
-                <ul class="list-group list-group-flush">
-                    @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
-                        <li class="list-group-item"><strong>Hostel Level:</strong><p class="mb-0 text-muted ps-3">{{ $occurrence->hostel_input ?? 'No input yet.' }}</p></li>
-                        <li class="list-group-item"><strong>Zonal Officer:</strong><p class="mb-0 text-muted ps-3">{{ $occurrence->zonal_officer_input ?? 'No input yet.' }}</p></li>
-                        <li class="list-group-item"><strong>Administrator:</strong><p class="mb-0 text-muted ps-3">{{ $occurrence->administrator_input ?? 'No input yet.' }}</p></li>
-                        <li class="list-group-item"><strong>Manager:</strong><p class="mb-0 text-muted ps-3">{{ $occurrence->manager_input ?? 'No input yet.' }}</p></li>
-                        <li class="list-group-item"><strong>Director:</strong><p class="mb-0 text-muted ps-3">{{ $occurrence->director_input ?? 'No input yet.' }}</p></li>
-                    @else
-                        <li class="list-group-item"><strong>Your Input:</strong><p class="mb-0 text-muted ps-3">{{ $occurrence->hostel_input ?? 'No input yet.' }}</p></li>
-                    @endif
+           
+            <!-- Tabs Scrollable Container -->
+            
+            <div class="tab-scroll-wrapper overflow-auto" style="white-space: nowrap; -webkit-overflow-scrolling: touch;">
+                <ul class="nav nav-tabs nav-tabs-inverse flex-nowrap mb-0">
+                    <li class="nav-item"><a href="#tab-details" data-bs-toggle="tab" class="nav-link active">Occurrence Details</a></li>
+                    <li class="nav-item"><a href="#tab-escalations" data-bs-toggle="tab" class="nav-link">Escalations</a></li>
+                    <li class="nav-item"><a href="#tab-resolution" data-bs-toggle="tab" class="nav-link">Resolution</a></li>
+                    <li class="nav-item"><a href="#tab-inputs" data-bs-toggle="tab" class="nav-link">Stakeholder Inputs</a></li>
+                    <li class="nav-item"><a href="#tab-files" data-bs-toggle="tab" class="nav-link">Occurrence Files</a></li>
                 </ul>
             </div>
-        </div>
 
-        {{-- Files Column --}}
-        <div class="col-lg-5">
-            <div class="card shadow-sm">
-                 <div class="card-header"><i class="fas fa-paperclip me-2"></i>Attached Files</div>
-                 <div class="list-group list-group-flush">
-                    @forelse($occurrence->files as $file)
-                        <a href="{{ asset('storage/occurrence_files/' . $file->original_name) }}" target="_blank" class="list-group-item list-group-item-action d-flex align-items-center">
-                            <i class="fas fa-file-alt text-primary me-3"></i>
-                            <span>{{ \Illuminate\Support\Str::limit($file->original_name, 40) }}</span>
-                        </a>
-                    @empty
-                        <div class="list-group-item">
-                            <span class="text-muted">No files were attached.</span>
+
+          
+        </div>
+    </div>
+
+
+        <div class="panel-body tab-content">
+
+            {{-- Tab 1: Occurrence Details --}}
+
+            <div class="tab-pane fade show active" id="tab-details">
+                <div class="card shadow-sm mb-4 mt-3 border-0 rounded-4">
+                    <div class="card-header bg-primary text-white rounded-top-4">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Occurrence Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <!-- Left Column: Key Details -->
+                            <div class="col-md-6 col-12">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                        <strong>Reported By</strong>
+                                        <span>{{ $occurrence->user->name ?? 'N/A' }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                        <strong>Shift</strong>
+                                        <span>{{ $occurrence->shift }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                        <strong>Hostel</strong>
+                                        <span>{{ $occurrence->hostel }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                        <strong>Date</strong>
+                                        <span>{{ \Carbon\Carbon::parse($occurrence->date)->format('F j, Y') }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                        <strong>Time of Occurrence</strong>
+                                        <span>{{ \Carbon\Carbon::parse($occurrence->time_of_occurrence)->format('g:i A') }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                        <strong>Time of Reporting</strong>
+                                        <span>{{ \Carbon\Carbon::parse($occurrence->time_of_reporting)->format('g:i A') }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                        <strong>Occurrence Type</strong>
+                                        <span>{{ $occurrence->occurrence_type }}</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                        <strong>Resolved</strong>
+                                        <span class="badge {{ $occurrence->resolved === 'Yes' ? 'bg-success' : 'bg-danger' }}">
+                                            {{ $occurrence->resolved }}
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Right Column: Narrative Details -->
+                            <div class="col-md-6 col-12">
+                                <div class="border-start ps-md-4 ps-0">
+                                    <strong> <h6 class="fw-bold">Nature of Occurrence</h6> </strong>
+                                    <p class="text-muted mb-3">{{ $occurrence->nature }}</p>
+
+                                    <h6 class="fw-bold">Action Taken</h6>
+                                    <p class="text-muted mb-3">{{ $occurrence->action_taken }}</p>
+
+                                    <h6 class="fw-bold">Resolution</h6>
+                                    <p class="text-muted mb-0">{{ $occurrence->resolution ?? 'No resolution provided yet.' }}</p>
+                                </div>
+                            </div>
                         </div>
-                    @endforelse
+                    </div>
                 </div>
             </div>
-        </div>
+
+            {{-- Tab 2: Escalations --}}
+           <div class="tab-pane fade" id="tab-escalations">
+                @include('occurrences.partials.escalations')
+            </div>
+
+
+            {{-- Tab 3: Resolution --}}
+            <div class="tab-pane fade" id="tab-resolution">
+                <div class="card shadow-sm mt-3">
+                    <div class="card-body">
+                        @include('occurrences.partials.resolutions')
+                    </div>
+                </div>
+            </div>
+
+
+            {{-- Tab 4: Stakeholder Inputs --}}
+            <div class="tab-pane fade" id="tab-inputs">
+                @include('occurrences.partials.stakeholders', ['occurrence' => $occurrence])
+            </div>
+
+
+            {{-- Tab 5: Occurrence Files --}}
+          
+            @include('occurrences.partials.files')
+
+        </div> {{-- panel-body --}}
+    </div> {{-- panel --}}
+
+</div> {{-- container --}}
+
+
+
+<!-- Input Modal -->
+<div class="modal fade" id="inputModal" tabindex="-1" aria-labelledby="inputModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <form id="inputForm" action="{{ route('occurrence.input.store', $occurrence->id) }}" method="POST">
+            @csrf
+            <input type="hidden" name="occurrence_id" value="{{ $occurrence->id }}">
+            <input type="hidden" name="role" value="{{ auth()->user()->role }}">
+            <input type="hidden" name="parent_id" id="parent_id" value="">
+
+            <div class="modal-content rounded-3 shadow-lg border-0">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="inputModalLabel">
+                        <i class="fas fa-comment-dots me-2"></i> Add Input
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <!-- User Role Display -->
+                    <div class="mb-3">
+                        <span class="badge bg-info text-dark px-3 py-2">
+                            {{ auth()->user()->role }} : {{ auth()->user()->name }}
+                        </span>
+                    </div>
+
+                    <!-- Input Text -->
+                    <div class="mb-3">
+                        <label for="input_text" class="form-label fw-semibold">Your Comment or Observation</label>
+                        <textarea class="form-control rounded-3 border-primary shadow-sm" 
+                                  id="input_text" name="input_text" rows="4" 
+                                  placeholder="Type your observation here..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <span id="btnText"><i class="fas fa-save me-1"></i> Save Input</span>
+                        <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
-{{-- Modal for adding input --}}
-<div class="modal fade" id="inputModal" tabindex="-1" aria-labelledby="inputModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="inputForm" action="{{ route('occurrence.input', $occurrence->id) }}" method="POST">
-      @csrf
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="inputModalLabel">Add Your Input</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          {{-- The occurrence ID and role are now static, no need for hidden fields from JS --}}
-          <input type="hidden" name="occurrence_id" value="{{ $occurrence->id }}">
-          <input type="hidden" name="role" value="{{ auth()->user()->role }}">
-          <div class="mb-3">
-            <label for="input_text" class="form-label">Your Comment or Observation</label>
-            <textarea class="form-control" id="input_text" name="input_text" rows="4" required></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Save Input</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
 @endsection
+@php
+    $firstResolutionId = $occurrence->resolutions->first()?->id ?? '';
+@endphp
+
+
 
 @push('scripts')
-{{-- No need for DataTables or complex AJAX since it's a detail page --}}
-{{-- The form will submit normally, which is fine for this action --}}
-{{-- If you prefer AJAX submission, the script can be simplified as follows: --}}<script>
+
+<script>
 document.addEventListener('DOMContentLoaded', function () {
     const inputForm = document.getElementById('inputForm');
     
@@ -199,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Optional: Disable button to prevent double-submission
         submitButton.disabled = true;
         submitButton.innerHTML = `
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
             Saving...
         `;
 
@@ -207,27 +298,26 @@ document.addEventListener('DOMContentLoaded', function () {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': formData.get('_token'),
-                'Accept': 'application/json' // We expect a JSON response
+                'Accept': 'application/json' // Expect JSON response
             },
             body: formData
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+        .then(async response => {
+            const data = await response.json();
+            if (response.ok && data.success) {
                 // Success case
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
                     text: data.message || 'Your input has been saved successfully!',
-                    timer: 2000, // Auto-close after 2 seconds
+                    timer: 2000,
                     showConfirmButton: false
                 }).then(() => {
-                    // We use .then() to ensure the page reloads *after* the alert is closed
-                    window.location.reload(); 
+                    // Reload after alert
+                    window.location.reload();
                 });
-
             } else {
-                // Server-side error case (e.g., validation failed)
+                // Validation or server-side error
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',
@@ -236,7 +326,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })
         .catch(error => {
-            // Network or other unexpected error case
             console.error('Submission Error:', error);
             Swal.fire({
                 icon: 'error',
@@ -245,13 +334,34 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         })
         .finally(() => {
-            // Re-enable the button regardless of outcome
             submitButton.disabled = false;
-            submitButton.innerHTML = 'Save Input';
+            submitButton.innerHTML = '<i class="fas fa-save me-1"></i> Save Input';
+        });
+    });
+
+    // Optional: Pre-fill parent_id when replying to a comment
+    document.querySelectorAll('.reply-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            const parentId = this.dataset.commentId; // e.g., <button class="reply-btn" data-comment-id="5">
+            document.getElementById('parent_id').value = parentId;
+            const modal = new bootstrap.Modal(document.getElementById('inputModal'));
+            modal.show();
         });
     });
 });
+
+document.querySelectorAll('.reply-btn').forEach(button => {
+    button.addEventListener('click', function () {
+        const parentId = this.dataset.commentId;
+        document.getElementById('parent_id').value = parentId;
+
+        const modal = new bootstrap.Modal(document.getElementById('inputModal'));
+        modal.show();
+    });
+});
+
 </script>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -331,5 +441,227 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById('uploadFilesForm');
+    const occurrenceId = "{{ $occurrence->id ?? '' }}";
+
+    // Generate dynamic route with placeholder
+    let uploadRouteTemplate = "{{ route('occurrence.upload-files', ':id') }}";
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+
+
+        const files = document.getElementById('attachmentOccurrence').files;
+        
+        if (!files.length) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'No files selected',
+                text: 'Please choose at least one file to upload.'
+            });
+            return;
+        }
+
+        const maxFileSize = 5 * 1024 * 1024; // 5MB
+        for (let i = 0; i < files.length; i++) {
+            if (files[i].size > maxFileSize) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File too large',
+                    text: `${files[i].name} exceeds 5MB size limit.`
+                });
+                return;
+            }
+        }
+
+        const formData = new FormData(form);
+
+        // Replace placeholder with actual occurrence ID
+        const uploadUrl = uploadRouteTemplate.replace(':id', occurrenceId);
+
+        fetch(uploadUrl, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('uploadFilesModal'));
+                modal.hide();
+                form.reset();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Files uploaded',
+                    text: 'Your files have been uploaded successfully.',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Upload failed',
+                    text: data.message || 'An error occurred while uploading files.'
+                });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while uploading files.'
+            });
+        });
+    });
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.querySelector('.tab-overflow ul.nav-tabs');
+    const prevBtn = document.querySelector('.prev-button a');
+    const nextBtn = document.querySelector('.next-button a');
+
+    prevBtn?.addEventListener('click', () => {
+        container.scrollBy({ left: -150, behavior: 'smooth' });
+    });
+
+    nextBtn?.addEventListener('click', () => {
+        container.scrollBy({ left: 150, behavior: 'smooth' });
+    });
+});
+
+
+</script>
+
+
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
+
+<script>
+$(document).ready(function () {
+    // Initialize DataTable
+    var table = $('#occurrenceEscalationTable').DataTable({
+        dom: 'Bfrtip',
+        buttons: ['copy', 'csv', 'excel', 'pdf', 'print', 'colvis'],
+        order: [[1, 'desc']],
+        responsive: true,
+        language: {
+            search: "_INPUT_",
+            searchPlaceholder: "Search escalations..."
+        }
+    });
+
+    // Enable Bootstrap tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+
+
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById('uploadFilesResolutionForm');
+  const modalEl = document.getElementById('uploadFilesResolutionModal');
+
+  // When modal opens, pull IDs off the button and drop them into hidden inputs
+  modalEl.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget; // the button that triggered the modal
+    const occurrenceId = button?.getAttribute('data-occurrence-id') || '';
+    const resolutionId = button?.getAttribute('data-resolution-id') || '';
+
+    document.getElementById('occurrence_id').value = occurrenceId;
+    document.getElementById('resolution_id').value = resolutionId;
+
+
+
+
+  });
+
+  // Build route template once (Laravel route with placeholder)
+  const uploadRouteTemplate = "{{ route('occurrence.resolution.upload-files', ':id') }}";
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const files = document.getElementById('attachment').files;
+    if (!files.length) {
+      Swal.fire({ icon: 'warning', title: 'No files selected', text: 'Please choose at least one file to upload.' });
+      return;
+    }
+
+    const maxFileSize = 5 * 1024 * 1024; // 5MB
+    for (let i = 0; i < files.length; i++) {
+      if (files[i].size > maxFileSize) {
+        Swal.fire({ icon: 'error', title: 'File too large', text: `${files[i].name} exceeds 5MB size limit.` });
+        return;
+      }
+    }
+
+    const occurrenceId = document.getElementById('occurrence_id').value;
+    const resolutionId = document.getElementById('resolution_id').value;
+
+    
+
+    const formData = new FormData(form);
+    // ensure resolution_id is present even if JS runs before hidden inputs are set
+    if (!formData.has('resolution_id')) formData.append('resolution_id', resolutionId);
+    if (!formData.has('occurrence_id')) formData.append('occurrence_id', occurrenceId);
+
+    const uploadUrl = uploadRouteTemplate.replace(':id', occurrenceId);
+
+    fetch(uploadUrl, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl); // ✅ correct modal id
+        modalInstance.hide();
+        form.reset();
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Files uploaded',
+          text: 'Your files have been uploaded successfully.',
+          timer: 1500,
+          showConfirmButton: false
+        }).then(() => location.reload());
+      } else {
+        Swal.fire({ icon: 'error', title: 'Upload failed', text: data.message || 'An error occurred while uploading files.' });
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      Swal.fire({ icon: 'error', title: 'Error', text: 'An error occurred while uploading files.' });
+    });
+  });
+});
+</script>
+
 @endpush

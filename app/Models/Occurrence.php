@@ -27,4 +27,24 @@ class Occurrence extends Model
         return self::where('user_id', $userId)->latest()->value('hostel');
     }
 
+    // Occurrence.php
+    public function resolutions()
+    {
+        return $this->hasMany(Resolution::class, 'occurrence_id');
+    }
+
+
+// app/Models/Occurrence.php
+
+public function escalations()
+{
+    return $this->hasMany(Escalation::class, 'occurrence_id');
+}
+
+public function inputs()
+{
+    return $this->hasMany(OccurrenceInput::class)->with('user', 'replies');
+}
+
+
 }

@@ -11,9 +11,15 @@ use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\StudentStatisticController;
 use App\Http\Controllers\EscalationMatrixController;
 use App\Http\Controllers\EscalationController;
-
+use App\Http\Controllers\ResolutionController;
 use App\Http\Controllers\HandoverTakeoverController;
+use App\Http\Controllers\OccurrenceInputController;
 
+Route::get('/test', function () {
+    // We will pass an empty appClass to keep it simple
+    $appClass = 'app-header-fixed';
+    return view('layouts/test', compact('appClass'));
+});
 
 Route::get('/', function () {
     Log::info("Home page: ");
@@ -93,6 +99,28 @@ Route::prefix('occurrence')->name('occurrence.')->middleware('auth')->group(func
     Route::get('/{occurrence}', [OccurrenceController::class, 'show'])->name('show');
 
     Route::post('/{occurrence}/resolve', [OccurrenceController::class, 'markAsResolved'])->name('resolve');
+
+
+    // Upload files for an occurrence
+Route::post('/{occurrence}/upload-files', [OccurrenceController::class, 'uploadFiles'])->name('upload-files');
+
+
+
+Route::post('/{occurrence}/resolution', [ResolutionController::class, 'store'])
+    ->name('resolution.store');
+
+    Route::get('/{occurrence}/resolution/create', [ResolutionController::class, 'create'])
+    ->name('resolution.create');
+
+    // Upload files for an occurrence
+Route::post('/{occurrence}/upload-files-res', [ResolutionController::class, 'reUploadFiles'])
+    ->name('resolution.upload-files');
+
+
+    Route::post('/{occurrence}/input', [OccurrenceInputController::class, 'store'])
+        ->name('input.store');
+
+
 
 });
 

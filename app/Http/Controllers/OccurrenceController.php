@@ -137,9 +137,22 @@ class OccurrenceController extends Controller
                 // Store filename in DB
                 $occurrence->files()->create([
                     'occurrence_id' => $occurrence->id,
-                    'original_name' => $fileName
+                    'original_name' => $fileName,
+                    'uploaded_by' => auth()->user()->name
+
                 ]);
             }
+        }
+
+
+        if ($request->resolved === 'yes' && $request->resolution) {
+            $occurrence->resolutions()->create([
+                'occurrence_id'    => $occurrence->id,
+                'resolved_by' => auth()->id(),
+                'description' => $request->resolution,
+                'resolution_date' => $request->date,
+                'resolution_time' => $request->time_of_reporting,
+            ]);
         }
 
 
@@ -334,18 +347,22 @@ class OccurrenceController extends Controller
 
 
 
-   public function show(Occurrence $occurrence)
-    {
-        
-        $occurrence->load('files', 'user');
+  public function show(Occurrence $occurrence)
+{
+    // Eager load related models: files, user, resolutions, and escalations with their users
+    $occurrence->load([
+        'files', 
+        'user', 
+        'resolutions.resolver',  // if resolutions have a resolver relationship
+        'escalations.user'       // load the user who sent each escalation
+    ]);
 
-        // Return the view and pass the single occurrence data to it
-        return view('occurrences.view', [
-            'occurrence' => $occurrence
-        ]);
+    // Pass the occurrence with all related data to the view
+    return view('occurrences.view', [
+        'occurrence' => $occurrence
+    ]);
+}
 
-        
-    }
     public function markAsResolved(Occurrence $occurrence)
     {
         // Authorization Check: Ensure the user is not a housekeeper or attendant.
@@ -370,6 +387,58 @@ class OccurrenceController extends Controller
         }
     
     }
+
+
+public function uploadFiles(Request $request, Occurrence $occurrence)
+{
+    // Validate request
+    $request->validate([
+        'attachment.*' => 'required|file|max:10240', // max 10 MB per file
+    ]);
+
+    $uploadedFiles = [];
+
+    if ($request->hasFile('attachment')) {
+        $uploadPath = public_path('uploads/occurrence_files');
+
+        foreach ($request->file('attachment') as $file) {
+            $fileSize = $file->getSize(); // in bytes
+            $maxSize = 10 * 1024 * 1024; // 10 MB
+
+            if ($fileSize > $maxSize) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'File ' . $file->getClientOriginalName() . ' exceeds the maximum allowed size of 10 MB.'
+                ]);
+            }
+
+            // Unique filename
+            $fileName = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+
+            // Move to public folder
+            $file->move($uploadPath, $fileName);
+
+            // Store filename in DB
+            $occurrenceFile = $occurrence->files()->create([
+                'occurrence_id' => $occurrence->id,
+                'original_name' => $fileName,
+                'uploaded_by' => auth()->user()->name
+
+            ]);
+
+            $uploadedFiles[] = [
+                'file_name' => $occurrenceFile->original_name,
+                'file_url' => asset('uploads/occurrence_files/' . $occurrenceFile->original_name)
+            ];
+        }
+    }
+
+    return response()->json([
+        'success' => true,
+        'files' => $uploadedFiles
+    ]);
+}
+
 
 
 

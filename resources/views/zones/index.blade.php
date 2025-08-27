@@ -42,13 +42,18 @@
                                         <a href="{{ route('zones.edit', $zone->id) }}" class="btn btn-sm btn-outline-success">
                                             <i class="fa fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('zones.destroy', $zone->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure to delete this zone?');">
+
+                                        {{-- 
+
+                                            <form action="{{ route('zones.destroy', $zone->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure to delete this zone?');">
                                             @csrf
                                             @method('DELETE')
                                             <button class="btn btn-sm btn-outline-danger">
                                                 <i class="fa fa-trash"></i>
                                             </button>
                                         </form>
+                                        --}}
+                                        
                                     </td>
                                 </tr>
                             @empty

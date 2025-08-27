@@ -36,7 +36,9 @@
                             <th>Students Present</th>
                             <th>Comments</th>
                             @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
-                            <th>Actions</th>
+                            
+
+                            {{--<th>Actions</th>--}}
                             @endif
                         </tr>
                     </thead>
@@ -52,15 +54,22 @@
                                 <td>{{ $stat->comments ?? '-' }}</td>
 
                                 @if (!in_array(auth()->user()->role, ['house_keeper', 'hostel_attendant']))
-                                <td>
-                                    <form id="delete-form-{{ $stat->id }}" action="{{ route('student_statistics.destroy', $stat->id) }}" method="POST">
+                               
+
+                                    {{--
+                                     <td>
+                                         <form id="delete-form-{{ $stat->id }}" action="{{ route('student_statistics.destroy', $stat->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="{{ $stat->id }}">
                                             <i class="fas fa-trash-alt"></i>
                                         </button>
                                     </form>
-                                </td>
+
+                                     </td>
+                                    --}}
+                                   
+                               
                                 @endif
 
                             </tr>

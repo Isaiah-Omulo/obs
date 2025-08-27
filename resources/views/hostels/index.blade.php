@@ -41,13 +41,18 @@
                                         <a href="{{ route('hostels.edit', $hostel->id) }}" class="btn btn-warning btn-sm">
                                             <i class="fa fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('hostels.destroy', $hostel->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this hostel?');">
+
+                                        {{--
+
+                                            <form action="{{ route('hostels.destroy', $hostel->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this hostel?');">
                                             @csrf
                                             @method('DELETE')
                                             <button class="btn btn-danger btn-sm">
                                                 <i class="fa fa-trash"></i>
                                             </button>
                                         </form>
+                                        --}}
+                                        
                                     </td>
                                 </tr>
                             @empty

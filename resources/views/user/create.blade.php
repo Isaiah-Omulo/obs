@@ -67,21 +67,24 @@
                             @error('phone') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label" for="role">Role</label>
-                            <select id="role" name="role" class="form-control select2" required>
-                                <option value="">Select a role</option>
-                                <option value="house_keeper">House Keeper</option>
-                                <option value="hostel_attendant">Hostel Attendant</option>
-                                <option value="administrator">Administrator</option>
-                                <option value="coordinator">Coordinator</option>
-                                
-                                <option value="zonal_officer" >Zonal Officer</option>
-                                <option value="director" >Director</option>
-                                <option value="manager" >Manager</option>
-                            </select>
-                            @error('role') <small class="text-danger">{{ $message }}</small> @enderror
-                        </div>
+                       <div class="mb-3">
+                        <label class="form-label" for="role">Role</label>
+                        <select id="role" name="role" class="form-control select2" required>
+                            <option value="">Select a role</option>
+                            @foreach($roles as $role)
+                                <option value="{{ $role }}">{{ ucwords(str_replace('_', ' ', $role)) }}</option>
+                            @endforeach
+                            <option value="other">Other</option>
+                        </select>
+                        @error('role') <small class="text-danger">{{ $message }}</small> @enderror
+                    </div>
+
+                    <div class="mb-3" id="other-role-div" style="display:none;">
+                        <label class="form-label" for="other_role">Specify Role</label>
+                        <input type="text" id="other_role" name="other_role" class="form-control" placeholder="Enter role">
+                        @error('other_role') <small class="text-danger">{{ $message }}</small> @enderror
+                    </div>
+
 
                         <button type="submit" class="btn btn-success w-100">Create User</button>
                     </form>
@@ -99,13 +102,24 @@
 @endsection
 
 @push('scripts')
-<!-- Make sure to include Select2 CSS & JS in your main layout if not already present -->
+<!-- Make sure to include Select2 CSS & JS in your main layout if not already present 
 <script>
     $(document).ready(function() {
         $('.select2').select2({
-            placeholder: "Select a role",
             allowClear: true
         });
+    });
+</script>
+-->
+
+<script>
+    document.getElementById('role').addEventListener('change', function() {
+        const otherDiv = document.getElementById('other-role-div');
+        if (this.value === 'other') {
+            otherDiv.style.display = 'block';
+        } else {
+            otherDiv.style.display = 'none';
+        }
     });
 </script>
 @endpush

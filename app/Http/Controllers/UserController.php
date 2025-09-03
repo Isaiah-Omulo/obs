@@ -72,28 +72,40 @@ class UserController extends Controller
 
     public function create()
     {
-       
-         $disallowedRoles = ['hostel_attendant', 'house_keeper'];
+        $baseRoles = ['house_keeper', 'hostel_attendant', 'administrator', 'coordinator', 'zonal_officer', 'director', 'manager'];
 
-            if (in_array(auth()->user()->role, $disallowedRoles)) {
-                abort(403, 'Unauthorized action.');
-            }
-            return view('user.create');
+        // Get unique roles from users table, excluding null/empty
+        $existingRoles = User::whereNotNull('role')
+            ->pluck('role')
+            ->unique()
+            ->toArray();
+
+        // Merge base roles and existing roles
+        $roles = array_unique(array_merge($baseRoles, $existingRoles));
+
+        // Optionally, exclude roles that the currently authenticated user cannot assign
+        $disallowedRoles = ['hostel_attendant', 'house_keeper'];
+        if (in_array(auth()->user()->role, $disallowedRoles)) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return view('user.create', compact('roles'));
     }
+
 
     public function store(Request $request)
     {
-        // Sanitize inputs (e.g., trim email)
-        $request->merge([
-            'email' => trim($request->email),
-        ]);
+        $request->merge(['email' => trim($request->email)]);
 
-        // Validate request
+        // Determine final role
+        $finalRole = $request->role === 'other' ? trim($request->other_role) : $request->role;
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|unique:users,phone|max:20',
             'role' => 'required|string',
+            'other_role' => $request->role === 'other' ? 'required|string|max:50' : 'nullable',
             'password' => 'nullable|string|min:6|confirmed',
         ]);
 
@@ -101,7 +113,7 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
-            'role' => $request->role,
+            'role' => $finalRole,
         ];
 
         if ($request->filled('password')) {
@@ -110,10 +122,7 @@ class UserController extends Controller
 
         try {
             $user = User::create($data);
-
-        // Send registration email
             Mail::to($user->email)->send(new UserRegisteredMail($user));
-            // Log email sending
             Log::info("Registration email sent to user: {$user->email}, ID: {$user->id}");
             return redirect()->route('user.create')->with('success', 'User created successfully!');
         } catch (\Exception $e) {

@@ -46,24 +46,8 @@ return [
         [
             'icon'     => 'fa fa-file-alt',
             'title'    => 'Reports',
-            'sub_menu' => [
-                [
-                    'title'      => 'All Reports',
-                    'route-name' => 'daily_reports.all'
-                ],
-                [
-                    'title'      => 'Add',
-                    'route-name' => 'daily_reports.create'
-                ],
-                [
-                    'title'      => 'Zonal Reports',
-                    'route-name' => 'daily_reports.index' // You can filter by user role or zone in controller/view
-                ],
-                [
-                    'title'      => 'Administrator/Coordinator',
-                    'route-name' => 'daily_reports.admin' // You'll define this route in web.php and controller
-                ]
-            ]
+            'route-name' => 'daily_reports.index'
+            
         ],
          [
             'icon'     => 'fa fa-chart-bar',
@@ -87,6 +71,12 @@ return [
             'icon'     => 'fa fa-people-arrows',
             'title'    => 'Handover/Takeover',
             'route-name' => 'takeover.create' 
+        ],
+
+           [
+            'icon'       => 'fa fa-tint', // A water droplet icon
+            'title'      => 'Water Monitoring',
+            'route-name' => 'water_monitoring.index'
         ],
 
         

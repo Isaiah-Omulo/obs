@@ -27,4 +27,9 @@ class Hostel extends Model
     {
         return $this->hasOne(StudentStatistic::class)->latestOfMany();
     }
+
+      public function waterMonitorings(): HasMany
+    {
+        return $this->hasMany(WaterMonitoring::class);
+    }
 }

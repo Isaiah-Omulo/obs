@@ -333,7 +333,7 @@
     <thead>
         <tr>
             <th rowspan="2" class="hostel-name-col">Hostel</th>
-            <th rowspan="2" class="capacity-col">Cap.</th>
+            <th rowspan="2" class="capacity-col">Max No. of Students</th>
             <th colspan="2">Mon</th><th colspan="2">Tue</th><th colspan="2">Wed</th>
             <th colspan="2">Thu</th><th colspan="2">Fri</th><th colspan="2">Sat</th>
             <th colspan="2">Sun</th>
@@ -354,12 +354,13 @@
             <tr>
                 <td class="hostel-name-col">{{ $hostel->name }}</td>
                 <td class="capacity-col">{{ $hostel->capacity }}</td>
-                
+                @php $todayIndex = (now()->dayOfWeekIso - 1) * 2; @endphp
                 @foreach($hostel->occupancy as $index => $count)
                    
-                    <td class="{{ ($index % 2 != 0) ? 'day-divider' : '' }}">
-                        {!! $count !== null ? $count : '<span class="text-muted-light">—</span>' !!}
-                    </td>
+                    <td class="{{ ($index % 2 != 0) ? 'day-divider' : '' }} 
+				               {{ $index === $todayIndex || $index === $todayIndex+1 ? 'bg-cyan-200 fw-bold' : '' }}">
+				        {!! $count !== null ? $count : '<span class="text-muted-light">—</span>' !!}
+				    </td>
                 @endforeach
 
                 <td class="available-col fw-bold">
@@ -371,7 +372,7 @@
             </tr>
         @endforeach
     </tbody>
-    <tfoot>
+    <tfoot class="table-info">
         
         <tr>
             <td class="hostel-name-col">Total</td>
@@ -436,7 +437,7 @@
                         <tr>
                             {{-- CHANGED: The main column is now "Zone" --}}
                             <th rowspan="2" class="hostel-name-col">Zone</th>
-                            <th rowspan="2" class="capacity-col">Cap.</th>
+                            <th rowspan="2" class="capacity-col">Max No. of Students</th>
                             <th colspan="2">Mon</th><th colspan="2">Tue</th><th colspan="2">Wed</th>
                             <th colspan="2">Thu</th><th colspan="2">Fri</th><th colspan="2">Sat</th>
                             <th colspan="2">Sun</th>
@@ -658,33 +659,87 @@
 
 </div>
 
-<div class="card shadow-sm rounded-3 mb-4">
-    <div class="card-body">
-        <!-- Header and Filter -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
-            <h4 class="card-title mb-2 mb-md-0">📊 Student Attendance Statistics</h4>
-            <select id="periodFilter" class="form-select w-auto ms-md-3">
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly" selected>Monthly</option>
-                <option value="yearly">Yearly</option>
-            </select>
-        </div>
 
-        <!-- Scrollable Chart -->
-        <div style="overflow-x: auto;">
-            <div id="studentChart" style="height: 350px; min-width: 600px;"></div>
-        </div>
-    </div>
-</div>
 
 --}}
+
+ {{-- Summary Tiles Row --}}
+    <div class="row">
+
+        <!-- Tile 1: Hostels with Water Issues -->
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Water Issues (Today's Latest)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ $hostelsWithNoWater }} No Water / {{ $hostelsWithLittleWater }} Little
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                    <a href="{{ route('water_monitoring.index', ['date' => now()->toDateString()]) }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tile 2: Daily Monitoring Progress -->
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Water Monitoring Progress (Today)
+                            </div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">
+                                        {{ $reportsSubmittedToday }} / {{ $totalExpectedReports }} Reports
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    @php
+                                        $progress = $totalExpectedReports > 0 ? ($reportsSubmittedToday / $totalExpectedReports) * 100 : 0;
+                                    @endphp
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-info" role="progressbar"
+                                            style="width: {{ $progress }}%" aria-valuenow="{{ $progress }}" aria-valuemin="0"
+                                            aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                     <a href="{{ route('water_monitoring.index', ['date' => now()->toDateString()]) }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+@include('pages.includes.student_statistics')
 
 
 @endsection
 
 
 @push('scripts')
+
+
+{{-- Your other scripts... --}}
+
+
+
+
 
 <script>
     $(function () {
@@ -752,4 +807,261 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+
+
+{{-- Your existing scripts are here... --}}
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function () {
+    
+    // 1. Get the PHP data and safely convert it to JavaScript
+    const hostelData = @json($hostelWeeklyData);
+
+    // 2. Prepare the data for ApexCharts
+    const series = hostelData.map(hostel => {
+        return {
+            name: hostel.name,
+            // Filter out null values from occupancy data
+            data: hostel.occupancy.filter(d => d !== null) 
+        };
+    });
+
+    const categories = [
+        'Mon (N)', 'Mon (D)', 'Tue (N)', 'Tue (D)', 'Wed (N)', 'Wed (D)', 
+        'Thu (N)', 'Thu (D)', 'Fri (N)', 'Fri (D)', 'Sat (N)', 'Sat (D)', 
+        'Sun (N)', 'Sun (D)'
+    ];
+
+    // 3. Define the chart options
+    var options = {
+        chart: {
+            height: 400,
+            type: 'line',
+            zoom: {
+                enabled: false
+            },
+            toolbar: {
+                show: true,
+                tools: {
+                    download: true,
+                    selection: true,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
+                }
+            }
+        },
+        series: series,
+        xaxis: {
+            categories: categories,
+            title: {
+                text: 'Day of the Week (N: Night, D: Day)'
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Number of Students'
+            }
+        },
+        title: {
+            text: 'Hostel Occupancy Trends',
+            align: 'center',
+            style: {
+                fontSize: '16px',
+                fontWeight: 'bold',
+            }
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 3
+        },
+        markers: {
+            size: 5
+        },
+        tooltip: {
+            x: {
+                format: 'dd/MM/yy HH:mm'
+            },
+        },
+        grid: {
+            borderColor: '#f1f1f1',
+        },
+        legend: {
+            position: 'top',
+            horizontalAlign: 'right',
+            floating: true,
+            offsetY: -25,
+            offsetX: -5
+        }
+    };
+
+    // 4. Create and render the chart
+    var chart = new ApexCharts(
+        document.querySelector("#weeklyHostelOccupancyChart"),
+        options
+    );
+    chart.render();
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Get data from the hostel breakdown variable
+    const breakdownData = @json($hostelBreakdown);
+
+    // Prepare data
+    const labels = breakdownData.map(hostel => hostel.name);
+    const values = breakdownData.map(hostel => hostel.students_present);
+
+    var options = {
+        chart: {
+            type: 'bar',
+            height: 350
+        },
+        series: [{
+            name: 'Students Present',
+            data: values
+        }],
+        xaxis: {
+            categories: labels
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                borderRadius: 4
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        title: {
+            text: 'Current Hostel Population',
+            align: 'center'
+        },
+        colors: ['#008ffb']
+    };
+
+    var chart = new ApexCharts(document.querySelector("#studentsByHostelChart"), options);
+    chart.render();
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Get data from the occurrence type variable
+    const typeData = @json($totalByType);
+
+    // Prepare data
+    const labels = typeData.map(item => item.occurrence_type);
+    const values = typeData.map(item => item.total);
+
+    var options = {
+        chart: {
+            type: 'donut',
+            height: 350,
+            toolbar: {
+                show: true,
+                tools: {
+                    download: true,
+                    selection: true,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
+                }
+            }
+        },
+        series: values,
+        labels: labels,
+        title: {
+            text: 'Proportion of Occurrence Types',
+            align: 'center'
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
+
+    var chart = new ApexCharts(document.querySelector("#occurrenceTypeChart"), options);
+    chart.render();
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Get PHP data for the Zonal breakdown
+    // This assumes the $byZone variable is available from your controller.
+    const zonalData = @json($byZone);
+
+    // 2. Prepare the data for the chart
+    const zoneLabels = zonalData.map(zone => zone.name);
+    const zoneValues = zonalData.map(zone => zone.students_present);
+
+    // 3. Define the chart options
+    var options = {
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: true, // Optional: hide the toolbar for a cleaner look
+                tools: {
+                    download: true,
+                    selection: true,
+                    zoom: true,
+                    zoomin: true,
+                    zoomout: true,
+                    pan: true,
+                }
+            }
+        },
+        series: [{
+            name: 'Students Present',
+            data: zoneValues
+        }],
+        xaxis: {
+            categories: zoneLabels
+        },
+        yaxis: {
+            title: {
+                text: 'Number of Students'
+            }
+        },
+        plotOptions: {
+            bar: {
+                // This gives each bar its own color from the colors array
+                distributed: true, 
+                horizontal: false,
+                borderRadius: 4
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        // Hiding the legend as the x-axis labels are clear enough
+        legend: {
+            show: false
+        },
+        title: {
+            text: 'Current Student Population by Zone',
+            align: 'center'
+        },
+        // A nice color palette for the bars
+        colors: ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0', '#546E7A', '#26a69a', '#D10CE8'] 
+    };
+
+    // 4. Create and render the chart
+    var chart = new ApexCharts(document.querySelector("#zonalStudentsChart"), options);
+    chart.render();
+});
+</script>
 @endpush

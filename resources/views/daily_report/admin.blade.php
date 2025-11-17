@@ -96,7 +96,7 @@
                                 </td>
                                 @endif
 
-                                <td>
+                                <td data-order="{{ $report->report_date }} {{ $report->report_time }}">
                                     <strong>{{ \Carbon\Carbon::parse($report->report_date)->format('M d, Y') }}</strong><br>
                                     <small class="text-muted">{{ \Carbon\Carbon::parse($report->report_time)->format('h:i A') }}</small>
                                 </td>

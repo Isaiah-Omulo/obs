@@ -9,10 +9,15 @@
 	<link href="{{ asset('assets/css/vendor.min.css') }}" rel="stylesheet" />
 	<link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" />
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+
+	 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
 	<!-- ================== END core-css ================== -->
+
+
 </head>
 <body>
-	<div id="app" class="app app-sidebar-fixed d-flex flex-column {{ $appClass }}">
+	<div>
 		<!-- BEGIN #header -->
 		<header id="header" class="app-header">
 			<div class="d-flex align-items-center">
@@ -39,7 +44,23 @@
 
 		<!-- BEGIN #content -->
 		<div id="content" class="app-content">
-			<h1>Testing Core Functionality</h1>
+			<h1>Testing Cord Functionality:</h1>
+
+			<form action="http://httpbin.org/post" method="post">
+			  <select id="bears" multiple class="select2" name="test[]">
+			    <option value=""></option>
+			    <option>American Black Bear</option>
+			    <option>Asiatic Black Bear</option>
+			    <option>Brown Bear</option>
+			    <option>Giant Panda</option>
+			    <option>Sloth Bear</option>
+			    <option>Sun Bear</option>
+			    <option>Polar Bear</option>
+			    <option>Spectacled Bear</option>
+			  </select>
+			  <input type="submit">
+			</form>
+
 		</div>
 		<!-- END #content -->
 	</div><!-- END #app -->
@@ -48,5 +69,17 @@
 	<script src="{{ asset('assets/js/vendor.min.js') }}"></script>
 	<script src="{{ asset('assets/js/app.min.js') }}"></script>
 	<!-- ================== END core-js ================== -->
+
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      $(".select2").select2({
+        placeholder: "Begin typing a name to filter...",
+        width: "400px"
+      });
+    });
+  </script>
 </body>
 </html>

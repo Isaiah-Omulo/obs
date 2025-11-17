@@ -29,6 +29,8 @@ class HandoverTakeover extends Model
         'hostel_id',
         'shift',
         'comments',
+        'status',
+        'parent_id'
     ];
 
     /**
@@ -54,4 +56,30 @@ class HandoverTakeover extends Model
     {
         return $this->belongsTo(User::class, 'involved_user_id');
     }
+
+        public function items()
+    {
+        return $this->belongsToMany(Item::class, 'handover_takeover_item');
+    }
+
+
+     public function takeover()
+    {
+        return $this->hasOne(HandoverTakeover::class, 'parent_id');
+    }
+
+    public function handover()
+    {
+        return $this->belongsTo(HandoverTakeover::class, 'parent_id');
+    }
+
+
+    public function children()
+    {
+        return $this->hasMany(HandoverTakeover::class, 'parent_id');
+    }
+
+
+
+
 }

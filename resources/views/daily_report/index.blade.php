@@ -13,27 +13,138 @@
 
 @endpush
 
+@push('css')
+
+<style>
+    
+    .custom-tabs .nav-link {
+        color: black;
+        border: 3px solid transparent;
+        border-bottom-color: #dee2e6;
+    }
+
+    .custom-tabs .nav-link.active {
+        color: #fff; 
+        background-color: #0d6efd; 
+        border-color: #0d6efd;
+    }
+
+    
+    .custom-tabs .nav-link:not(.active):hover {
+        border-color: #94a5a4 #94a5a4 #94a5a4;
+        color: #94a5a4;
+    }
+</style>
+@endpush
+
+@php
+ $currentUserRole = Auth::user()->role;
+ $isKeeper = Str::contains($currentUserRole, 'keeper') || Str::contains($currentUserRole, 'attendant');
+@endphp
 
 @section('content')
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h4 class="mb-0">Zonal Reports</h4>
-        <a href="{{ route('daily_reports.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i> Add New Report 
-        </a>
+
+    {{-- =================================================================== --}}
+    {{-- 1. FIRST ROW: HEADER CONTROLS                                       --}}
+    {{-- =================================================================== --}}
+    <div class="row bg-light p-3 mb-4 rounded align-items-center" style="border: 3px solid #dee2e6;">
+        
+        {{-- Column for the Title --}}
+        <div class="col-md-4">
+            <h4 class="mb-0">Reports Section</h4>
+        </div>
+        
+        {{-- Column for the Date Filter --}}
+        <div class="col-md-4 ">
+           
+        </div>
+        
+        {{-- Column for the Add New Report Button --}}
+        <div class="col-md-4 text-end">
+            <a href="{{ route('daily_reports.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Add New Report 
+            </a>
+        </div>
+
     </div>
-  
 
 
-    {{-- session alert --}}
+ {{-- session alert --}}
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+  
+  @if(!$isKeeper)
+    <div class="row">
+        <div class="col-12">
+            <!-- The Tab Navigation Links with custom class -->
+            <ul class="nav nav-tabs custom-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#attendants_tab">Night Attendant / House Keeper </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#supervisors_tab">Supervisor / Zonal Officer</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#duty_officers_tab">Duty Officer</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#coordinators_tab">Coordinator / Administrator</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- The Tab Content Panes -->
+<div class="tab-content mt-3">
+    
+    {{-- Pane 1: Corresponds to the first tab link --}}
+    <div class="tab-pane container active" id="attendants_tab">
+        <div class="card card-body">
+            @include('daily_report.pages._attendants_report_table')
+        </div>
+    </div>
 
-    {{-- table --}}
+    {{-- Pane 2: Corresponds to the second tab link --}}
+    <div class="tab-pane container fade" id="supervisors_tab">
+        <div class="card card-body">
+            {{-- Reports for Supervisors/Zonal Officers will be listed here --}}
+             @include('daily_report.pages._zonal_report_table')
+        </div>
+    </div>
+
+    {{-- Pane 3: Corresponds to the third tab link --}}
+    <div class="tab-pane container fade" id="duty_officers_tab">
+        <div class="card card-body">
+            {{-- Reports for Duty Officers will be listed here --}}
+           @include('daily_report.pages._duty_report_table')
+        </div>
+    </div>
+
+    {{-- Pane 4: Corresponds to the fourth tab link --}}
+    <div class="tab-pane container fade" id="coordinators_tab">
+        <div class="card card-body">
+            {{-- Reports for Coordinators/Administrators will be listed here --}}
+            @include('daily_report.pages._coordinator_report_table')
+           
+        </div>
+    </div>
+
+</div>
+
+@else
+ <div class="card card-body">
+            @include('daily_report.pages._attendants_report_table')
+ </div>
+@endif
+
+   
+
+    {{-- table 
     <div class="card shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -51,7 +162,7 @@
                             <th>Report</th>
                             <th>Shift</th>
                             <th>Zone</th>
-                            <th>System User</th>
+                            <th>Report By</th>
                             <th>Manager</th>
                             <th>Director</th>
                         </tr>
@@ -64,23 +175,7 @@
 
                                 <div class="d-flex flex-wrap gap-1">
 
-                                    {{-- <a href="{{ route('daily_reports.edit', $report->id) }}" 
-                                           class="btn btn-sm btn-warning m-1" 
-                                           title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-
-                                       <form action="{{ route('daily_reports.destroy', $report->id) }}"
-                                          method="POST"
-                                          class="delete-form m-1"
-                                          data-report-id="{{ $report->id }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-sm btn-danger delete-btn" title="Delete">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>--}}
-                                        
+                                   
 
                                     <button class="btn btn-sm btn-info text-white m-1 btn-add-report-input" 
                                             data-id="{{ $report->id }}"
@@ -98,11 +193,19 @@
                                 </td>
                                 @endif
 
-                                <td>
+                                <td data-order="{{ $report->report_date }} {{ $report->report_time }}">
                                     <strong>{{ \Carbon\Carbon::parse($report->report_date)->format('M d, Y') }}</strong><br>
                                     <small class="text-muted">{{ \Carbon\Carbon::parse($report->report_time)->format('h:i A') }}</small>
                                 </td>
-                                <td>{{ $report->report }}</td>
+                              
+                                <td>{!! nl2br(e(Str::words($report->report, 40, '...'))) !!}
+                                    <br>
+                                    <a href="#" 
+                                       class="text-primary fw-bold view-full-report" 
+                                       data-report="{{ nl2br(e($report->report)) }}"
+                                       style="cursor: pointer;">View More</a>
+                                </td>
+
                                 <td>{{ ucfirst($report->shift) }}</td>
                                 <td>{{ $report->zone ?? '-' }}</td>
 
@@ -131,6 +234,26 @@
         </div>
     </div>
 </div>
+--}}
+
+<!-- Full Report Modal -->
+<div class="modal fade" id="fullReportModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h5 class="modal-title">Full Report</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div id="fullReportContent" style="white-space: pre-line;"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 
 <div class="modal fade" id="reportInputModal" tabindex="-1" aria-labelledby="reportInputModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -161,6 +284,8 @@
 
 @push('scripts')
 <script>
+
+
 document.addEventListener('DOMContentLoaded', function () {
     const deleteButtons = document.querySelectorAll('.delete-btn');
 
@@ -185,6 +310,18 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+$(document).on('click', '.view-full-report', function (e) {
+    e.preventDefault();
+
+    let fullText = $(this).data('report');
+
+    $('#fullReportContent').html(fullText);
+
+    let modal = new bootstrap.Modal(document.getElementById('fullReportModal'));
+    modal.show();
+});
+
 </script>
 
 
@@ -199,11 +336,55 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- Column Visibility button (This is the one you're missing) -->
 <script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.colVis.min.js"></script>
 
+
+<script>
+    $(document).ready(function() {
+        $('#attendantTable').DataTable(
+            {
+            dom: 'Bfrtip',
+            order: [[0, 'desc']],
+            buttons: [
+        {
+            extend: 'copy',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+       
+        {
+            extend: 'csv',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+        {
+            extend: 'excel',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+        {
+            extend: 'pdf',
+            exportOptions: { columns: ':not(:first-child)' },
+            orientation: 'landscape',
+            pageSize: 'A4'
+        },
+        {
+            extend: 'print',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+        'colvis'
+    ]
+        }
+        );
+         // Custom search box
+        $('#customSearchBox').on('keyup', function () {
+            table.search(this.value).draw();
+        });
+    });
+</script>
+
+
 <script>
     $(document).ready(function() {
         $('#zonalTable').DataTable(
             {
             dom: 'Bfrtip',
+            order: [[0, 'desc']],
             buttons: [
         {
             extend: 'copy',
@@ -308,6 +489,88 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(() => Swal.fire('Error', 'Submission failed.', 'error'));
     });
 });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#coordinatorTable').DataTable(
+            {
+            dom: 'Bfrtip',
+            order: [[0, 'desc']],
+            buttons: [
+        {
+            extend: 'copy',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+       
+        {
+            extend: 'csv',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+        {
+            extend: 'excel',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+        {
+            extend: 'pdf',
+            exportOptions: { columns: ':not(:first-child)' },
+            orientation: 'landscape',
+            pageSize: 'A4'
+        },
+        {
+            extend: 'print',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+        'colvis'
+    ]
+        }
+        );
+         // Custom search box
+        $('#customSearchBox').on('keyup', function () {
+            table.search(this.value).draw();
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        $('#dutyTable').DataTable(
+            {
+            dom: 'Bfrtip',
+            order: [[0, 'desc']],
+            buttons: [
+        {
+            extend: 'copy',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+       
+        {
+            extend: 'csv',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+        {
+            extend: 'excel',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+        {
+            extend: 'pdf',
+            exportOptions: { columns: ':not(:first-child)' },
+            orientation: 'landscape',
+            pageSize: 'A4'
+        },
+        {
+            extend: 'print',
+            exportOptions: { columns: ':not(:first-child)' }
+        },
+        'colvis'
+    ]
+        }
+        );
+         // Custom search box
+        $('#customSearchBox').on('keyup', function () {
+            table.search(this.value).draw();
+        });
+    });
 </script>
 @endpush
 

@@ -1,6 +1,14 @@
 @extends('layouts.default')
 @section('title', 'New Daily Report')
 
+
+@php
+    $role = Auth::user()->role;
+    $isZonal = $role === 'zonal_officer';
+    $isKeeper = Str::contains($role, 'keeper') || Str::contains($role, 'attendant');
+@endphp
+
+
 @section('content')
 <div class="container-fluid mt-5" >
     <!-- begin row -->
@@ -33,7 +41,7 @@
 
                     @php
                         $role = Auth::user()->role;
-                        $isZonal = $role === 'zonal_officer';
+                        $isZonal = Str::contains(strtolower($user->role), ['supervisor', 'zonal']);
                     @endphp
 
                     <form action="{{ route('daily_reports.store') }}" method="POST">
@@ -50,6 +58,21 @@
                             </select>
                             @error('zone') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
+                        @endif
+
+                        @if ($isKeeper)
+                            <div class="mb-3">
+                                <label class="form-label" for="hostel_id">Select Hostel</label>
+                                <select name="hostel_id" id="hostel_id" class="form-control select2" required>
+                                    <option value="" disabled {{ $lastHostel ? '' : 'selected' }}>-- Select Hostel --</option>
+                                    @foreach($hostels as $hostel)
+                                        <option value="{{ $hostel->id }}" {{ $lastHostel == $hostel->id ? 'selected' : '' }}>
+                                            {{ $hostel->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('hostel_id') <small class="text-danger">{{ $message }}</small> @enderror
+                            </div>
                         @endif
 
                         <div class="mb-3">

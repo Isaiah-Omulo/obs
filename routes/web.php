@@ -14,11 +14,12 @@ use App\Http\Controllers\EscalationController;
 use App\Http\Controllers\ResolutionController;
 use App\Http\Controllers\HandoverTakeoverController;
 use App\Http\Controllers\OccurrenceInputController;
+use App\Http\Controllers\WaterMonitoringController;
 
 Route::get('/test', function () {
     // We will pass an empty appClass to keep it simple
     $appClass = 'app-header-fixed';
-    return view('layouts/test', compact('appClass'));
+    return view('test', compact('appClass'));
 });
 
 Route::get('/', function () {
@@ -127,11 +128,12 @@ Route::post('/{occurrence}/upload-files-res', [ResolutionController::class, 'reU
 Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::get('/', [UserController::class, 'index'])->name('user.index');
     Route::get('/{id}/edit', [UserController::class, 'edit'])->name('user.edit');
-    Route::put('/update', [UserController::class, 'update'])->name('user.update');
+    
     Route::get('/create', [UserController::class, 'create'])->name('user.create');
     Route::post('/store', [UserController::class, 'store'])->name('user.store');
     Route::get('/users/{id}/delete', [UserController::class, 'destroy'])->name('user.destroy');
-    Route::put('/{id}/update', [UserController::class, 'updateWithId'])->name('user.updateWithId');
+    Route::put('/{id}/update', [UserController::class, 'update'])->name('user.update');
+
 
 });
 
@@ -240,4 +242,30 @@ Route::prefix('takeover')->name('takeover.')->middleware('auth')->group(function
            // List all handovers/takeovers
     Route::get('/create', [HandoverTakeoverController::class, 'create'])->name('create'); // Show form to take over a specific item
     Route::post('/', [HandoverTakeoverController::class, 'store'])->name('store');      // Store the takeover action
+
+
+    Route::post('/items/store', [HandoverTakeoverController::class, 'storeItems'])->name('items.store');
+
+    Route::get('/handover-takeovers/pending/{hostel_id}/{shift}', [HandoverTakeoverController::class, 'getPending'])
+    ->name('handover.pending');
+
+
+Route::get('/handover/pending-items/{id}', [HandoverTakeoverController::class, 'getPendingItems'])
+    ->name('handover.pending.items');
+Route::get('/takeover/{id}', [HandoverTakeoverController::class, 'show'])->name('show');
+
 });
+
+
+
+
+Route::middleware(['auth'])->group(function () {
+   
+    Route::get('/water-monitoring', [WaterMonitoringController::class, 'index'])
+        ->name('water_monitoring.index'); // Use underscore for consistency
+
+   
+    Route::get('/water-monitoring/create', [WaterMonitoringController::class, 'create'])->name('water_monitoring.create');
+    Route::post('/water-monitoring', [WaterMonitoringController::class, 'store'])->name('water_monitoring.store');
+});
+

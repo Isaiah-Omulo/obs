@@ -3,6 +3,15 @@
 
 
 
+
+@php
+    $role = Auth::user()->role;
+    $isZonal = $role === 'zonal_officer';
+    $isKeeper = Str::contains($role, 'keeper') || Str::contains($role, 'attendant');
+@endphp
+
+
+
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css">
@@ -51,9 +60,12 @@
                             <th>Report</th>
                             <th>Shift</th>
                             <th>Zone</th>
+                            <th>Hostel</th>
                             <th>System User</th>
+                            @if (!$isKeeper)
                             <th>Manager</th>
                             <th>Director</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -102,13 +114,34 @@
                                     <strong>{{ \Carbon\Carbon::parse($report->report_date)->format('M d, Y') }}</strong><br>
                                     <small class="text-muted">{{ \Carbon\Carbon::parse($report->report_time)->format('h:i A') }}</small>
                                 </td>
-                                <td>{{ $report->report }}</td>
+                                <td>
+                                    @php
+                                        $preview = Str::words($report->report, 20, '...');
+                                    @endphp
+
+                                    <span>{{ $preview }}</span>
+                                    
+                                    @if (Str::wordCount($report->report) > 20)
+                                        <button type="button" 
+                                                class="btn btn-sm btn-link text-primary read-more-btn" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#reportModal{{ $report->id }}">
+                                            Read More
+                                        </button>
+                                    @endif
+                                </td>
+
                                 <td>{{ ucfirst($report->shift) }}</td>
                                 <td>{{ $report->zone ?? '-' }}</td>
+                                <td>{{ $report->hostel->name ?? '-' }}</td>
+
 
                                 <td>{{ $report->user->name ?? 'N/A' }}</td>
+
+                                @if (!$isKeeper)
                                 <td id="manager-{{ $report->id }}">{{ $report->manager_input ?? 'N/A' }}</td>
                                 <td id="director-{{ $report->id }}">{{ $report->director_input ?? 'N/A' }}</td>
+                                @endif
                             </tr>
                         @empty
                            <tr>
@@ -120,8 +153,10 @@
                             <td></td>
                             <td></td>
                             <td></td>
+                             @if (!$isKeeper)
                             <td></td>
                             <td></td>
+                            @endif
 
                             </tr>
                         @endforelse
@@ -156,6 +191,30 @@
     </form>
   </div>
 </div>
+
+@foreach ($dailyReports as $report)
+<div class="modal fade" id="reportModal{{ $report->id }}" tabindex="-1" aria-labelledby="reportModalLabel{{ $report->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow-lg rounded-4">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="reportModalLabel{{ $report->id }}">
+                    Full Report (ID: {{ $report->id }})
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" style="max-height: 60vh; overflow-y: auto;">
+                <p class="text-dark fs-6 lh-lg">
+                    {{ $report->report }}
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+
 
 @endsection
 

@@ -46,25 +46,30 @@ class UserController extends Controller
     }
 
 
-   public function update(Request $request)
+      public function update(Request $request, $id)
     {
+        $user = User::findOrFail($id);
+
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . Auth::id(),
+            'name'  => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id, // ignore the same user
             'phone' => 'nullable|string|max:20',
-            'role' => 'nullable|string',
+            'role'  => 'nullable|string',
         ]);
 
-        $user = Auth::user();
+        // Collect the allowed fields
+        $data = $request->only(['name', 'email', 'phone', 'role']);
 
-        // Use the current role if none is submitted
-        $data = $request->only(['name', 'email', 'phone']);
-        $data['role'] = $request->input('role', $user->role);
+        // If 'role' is not sent, keep the current one
+        if (empty($data['role'])) {
+            $data['role'] = $user->role;
+        }
 
         $user->update($data);
 
-        return back()->with('success', 'Profile updated successfully!');
+        return redirect()->route('user.index')->with('success', 'User updated successfully!');
     }
+
 
 
 

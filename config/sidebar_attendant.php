@@ -23,5 +23,15 @@ return [
             'title'    => 'Handover/Takeover',
             'route-name' => 'takeover.create' 
         ],
+         [
+            'icon'     => 'fa fa-file-alt',
+            'title'    => 'Reports',
+            'route-name' => 'daily_reports.index' 
+        ],
+           [
+            'icon'       => 'fa fa-tint', // A water droplet icon
+            'title'      => 'Water Monitoring',
+            'route-name' => 'water_monitoring.index'
+        ],
     ],
 ];

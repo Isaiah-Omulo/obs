@@ -33,34 +33,40 @@
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-striped table-bordered align-middle" id="changeoverTable">
-                    <thead class="table-dark">
+                   <thead class="table-dark">
                         <tr>
-                           
-                            <th>Type</th>
+                          
                             <th>Shift</th>
                             <th>Hostel</th>
-                            <th>Performed By</th>
-                            <th>Involved User</th>
-                            <th>Comments</th>
-                            <th>Date & Time</th>
+                            <th>Handover By</th>
+                            <th>Status</th>
+                            <th>Handed Over At</th>
+                            <th>Handover Comments</th>                          
+                            
+                            <th>Actions</th> 
+                         
                         </tr>
                     </thead>
+
                     <tbody>
-                        @forelse($changeovers as $changeover)
-                            <tr id="changeover-row-{{ $changeover->id }}">
-                               
-                                <td>
-                                    <span class="badge {{ $changeover->changeover_type == 'take-over' ? 'bg-success' : 'bg-info' }}">
-                                        {{ ucwords(str_replace('-', ' ', $changeover->changeover_type)) }}
-                                    </span>
-                                </td>
-                                <td>{{ $changeover->shift }}</td>
-                                <td>{{ $changeover->hostel->name ?? 'N/A' }}</td>
-                                <td>{{ $changeover->actingUser->name ?? 'N/A' }}</td>
-                                <td>{{ $changeover->involvedUser->name ?? 'N/A' }}</td>
-                                <td>{{ \Illuminate\Support\Str::limit($changeover->comments, 50) }}</td>
-                                <td>{{ $changeover->created_at->format('M d, Y, h:i A') }}</td>
-                            </tr>
+                         @forelse($changeovers as $handover)
+                                <tr>
+                                   
+                                    <td>{{ $handover->shift }}</td>
+                                    <td>{{ $handover->hostel->name ?? 'N/A' }}</td>
+                                    <td>{{ $handover->actingUser->name ?? 'N/A' }}</td>
+                                    <td>{{ $handover->status ?? 'N/A' }}</td>
+                                    <td>{{ $handover->created_at ?? 'N/A' }}</td>
+                                    <td>{{ Str::limit($handover->comments, 50) }}</td>
+                                    <td>
+                                        <!-- View button -->
+                                        <a href="{{ route('takeover.show', $handover->id) }}" 
+                                           class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+
+                                </tr>
                         @empty
                             <tr>
                                <td></td>
@@ -68,9 +74,7 @@
                                <td></td>
                                <td></td>
                                <td></td>
-                               <td></td>
-                               <td></td>
-                               <td></td>
+                               
                               
                             </tr>
                         @endforelse

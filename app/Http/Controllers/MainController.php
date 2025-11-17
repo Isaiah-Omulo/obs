@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection; 
 use App\Models\DailyHostelSummary;
 
-
+use App\Models\WaterMonitoring;
 
 class MainController extends Controller
 {
@@ -546,7 +546,40 @@ class MainController extends Controller
            $nextWeekDate=$weeklyReportData['nextWeekDate'];
             $isCurrentWeek=$weeklyReportData['isCurrentWeek'];
 
+
+
+            $today_date = Carbon::today()->toDateString();
+
+        // --- Logic for Tile 1: Water Issues ---
+
+        // Get the latest report for each hostel for today
+        $latestReportsToday = WaterMonitoring::where('date', $today_date)
+            ->with('hostel')
+            // Get the single latest record for each hostel
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->unique('hostel_id');
+
+        // Count the number of hostels with issues based on their latest report
+        $hostelsWithNoWater = $latestReportsToday->where('is_water', 'No')->count();
+        $hostelsWithLittleWater = $latestReportsToday->where('is_water', 'Yes')->where('amount', 'Little')->count();
+
+
+        // --- Logic for Tile 2: Monitoring Progress ---
+
+        // Count total reports submitted today
+        $reportsSubmittedToday = WaterMonitoring::where('date', $today_date)->count();
+
+        // Calculate the total number of reports expected today
+        $totalHostels = Hostel::count();
+        $timeSlots = 6; // As defined in your application
+        $totalExpectedReports = $totalHostels * $timeSlots;
+
         return view('pages/dashboard-v2', compact(
+            'hostelsWithNoWater',
+            'hostelsWithLittleWater',
+            'reportsSubmittedToday',
+            'totalExpectedReports',
             'totalOccurrences',
             'unresolvedOccurrences',
             'todaysOccurrences',

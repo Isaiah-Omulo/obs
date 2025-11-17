@@ -22,7 +22,7 @@ class StudentStatistic extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->withTrashed();
     }
 
     // In StudentStatistic.php

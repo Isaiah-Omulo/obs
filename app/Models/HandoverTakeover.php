@@ -46,7 +46,7 @@ class HandoverTakeover extends Model
      */
     public function actingUser(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'acting_user_id');
+        return $this->belongsTo(User::class, 'acting_user_id')->withTrashed();
     }
 
     /**
@@ -54,7 +54,7 @@ class HandoverTakeover extends Model
      */
     public function involvedUser(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'involved_user_id');
+        return $this->belongsTo(User::class, 'involved_user_id')->withTrashed();
     }
 
         public function items()

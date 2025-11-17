@@ -27,7 +27,7 @@ class Resolution extends Model
     // User who resolved
     public function resolver()
     {
-        return $this->belongsTo(User::class, 'resolved_by');
+        return $this->belongsTo(User::class, 'resolved_by')->withTrashed();
     }
 
 

@@ -21,7 +21,7 @@ class ResolutionFile extends Model
     // Uploader
     public function uploader()
     {
-        return $this->belongsTo(User::class, 'uploaded_by');
+        return $this->belongsTo(User::class, 'uploaded_by')->withTrashed();
     }
 
 

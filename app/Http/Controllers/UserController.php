@@ -98,7 +98,7 @@ class UserController extends Controller
     }
 
 
-    public function store(Request $request)
+        public function store(Request $request)
     {
         $request->merge(['email' => trim($request->email)]);
 
@@ -107,13 +107,44 @@ class UserController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|unique:users,phone|max:20',
+            'email' => 'required|email',
+            'phone' => 'nullable|string|max:20',
             'role' => 'required|string',
             'other_role' => $request->role === 'other' ? 'required|string|max:50' : 'nullable',
             'password' => 'nullable|string|min:6|confirmed',
         ]);
 
+        // 🔥 Check if user exists but soft deleted
+        $existing = User::withTrashed()
+            ->where('email', $request->email)
+            ->orWhere('phone', $request->phone)
+            ->first();
+
+        if ($existing) {
+            if ($existing->trashed()) {
+                // Restore the user
+                $existing->restore();
+
+                // Update user with new data
+                $existing->update([
+                    'name' => $request->name,
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'role' => $finalRole,
+                    'password' => $request->filled('password')
+                        ? bcrypt($request->password)
+                        : $existing->password,
+                ]);
+
+                return redirect()->route('user.index')
+                    ->with('success', 'User restored and updated successfully!');
+            }
+
+            return redirect()->back()
+                ->withErrors(['email' => 'A user with this email or phone already exists.']);
+        }
+
+        // Create brand new user
         $data = [
             'name' => $request->name,
             'email' => $request->email,
@@ -125,15 +156,12 @@ class UserController extends Controller
             $data['password'] = bcrypt($request->password);
         }
 
-        try {
-            $user = User::create($data);
-            Mail::to($user->email)->send(new UserRegisteredMail($user));
-            Log::info("Registration email sent to user: {$user->email}, ID: {$user->id}");
-            return redirect()->route('user.create')->with('success', 'User created successfully!');
-        } catch (\Exception $e) {
-            Log::error("Failed to create user or send email: " . $e->getMessage());
-            return redirect()->back()->withErrors(['error' => 'Something went wrong. Please try again.']);
-        }
+        $user = User::create($data);
+
+        // Send mail (optional)
+        Mail::to($user->email)->send(new UserRegisteredMail($user));
+
+        return redirect()->route('user.index')->with('success', 'User created successfully!');
     }
 
 
